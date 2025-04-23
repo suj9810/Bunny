@@ -2,10 +2,12 @@ package sparta.bunny.order.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @Table(name = "orderMenus")
+@NoArgsConstructor
 public class OrderMenu {
 
     @Id

@@ -3,13 +3,13 @@ package sparta.bunny.order.entity;
 import jakarta.persistence.*;
 import jdk.jshell.Snippet;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import sparta.bunny.order.enums.OrderStatus;
-
-import java.awt.*;
 
 @Getter
 @Entity
 @Table(name = "order")
+@NoArgsConstructor
 public class Order {
 
     @Id
