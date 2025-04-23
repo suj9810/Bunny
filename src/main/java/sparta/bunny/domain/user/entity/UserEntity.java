@@ -9,14 +9,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sparta.bunny.common.audit.BaseEntity;
 
 @Entity
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserEntity {
+public class UserEntity extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,4 +48,14 @@ public class UserEntity {
 	@Column(nullable = false)
 	private Boolean isDeleted = false;
 
+	@Builder
+	public UserEntity(String userEmail, String userPassword, String nickname, UserRole userRole, String userNumber,
+		Boolean isDeleted) {
+		this.userEmail = userEmail;
+		this.userPassword = userPassword;
+		this.nickname = nickname;
+		this.userRole = userRole;
+		this.userNumber = userNumber;
+		this.isDeleted = isDeleted;
+	}
 }
