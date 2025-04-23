@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.domain.review.dto.request.ReviewCreateRequest;
+import sparta.bunny.domain.review.dto.response.ReviewCreateResponse;
 import sparta.bunny.domain.review.service.ReviewService;
 
 @RestController
@@ -21,9 +22,9 @@ public class ReviewController {
 	private final ReviewService reviewService;
 
 	@PostMapping
-	public ResponseEntity<CommonResponse> saveReview(@Valid @RequestBody ReviewCreateRequest request) {
-		CommonResponse commonResponse = reviewService.saveReview(request.getContent());
-		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(commonResponse);
+	public ResponseEntity<CommonResponse<ReviewCreateResponse>> saveReview(
+		@Valid @RequestBody ReviewCreateRequest request) {
+		CommonResponse<ReviewCreateResponse> response = reviewService.saveReview(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }

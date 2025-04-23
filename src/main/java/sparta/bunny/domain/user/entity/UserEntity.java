@@ -1,4 +1,4 @@
-package sparta.bunny.user.entity;
+package sparta.bunny.domain.user.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
