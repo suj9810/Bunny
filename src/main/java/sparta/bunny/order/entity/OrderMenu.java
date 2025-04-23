@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 @Getter
-@Entity(name = "orderMenus")
+@Entity
+@Table(name = "orderMenus")
 public class OrderMenu {
 
     @Id
