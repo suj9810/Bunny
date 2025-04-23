@@ -22,27 +22,4 @@ public class StoreRequestDto {
         this.categoryName = categoryName;
     }
 
-    public String getStoreName() {
-        return storeName;
-    }
-
-    public String getOpenTime() {
-        return openTime;
-    }
-
-    public String getCloseTime() {
-        return closeTime;
-    }
-
-    public Integer getMinOrderPrice() {
-        return minOrderPrice;
-    }
-
-    public String getNotice() {
-        return notice;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
 }

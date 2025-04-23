@@ -25,36 +25,4 @@ public class StoreResponseDto {
         this.isClosed = isClosed;
         this.categoryName = categoryName;
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getStoreName() {
-        return storeName;
-    }
-
-    public LocalTime getOpenTime() {
-        return openTime;
-    }
-
-    public LocalTime getCloseTime() {
-        return closeTime;
-    }
-
-    public Integer getMinOrderPrice() {
-        return minOrderPrice;
-    }
-
-    public String getNotice() {
-        return notice;
-    }
-
-    public Boolean getIsClosed() {
-        return isClosed;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
 }

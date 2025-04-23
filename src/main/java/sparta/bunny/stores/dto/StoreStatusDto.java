@@ -11,7 +11,4 @@ public class StoreStatusDto {
         this.isClosed = isClosed;
     }
 
-    public Boolean isClosed() {
-        return isClosed;
-    }
 }
