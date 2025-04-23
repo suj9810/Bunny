@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import sparta.bunny.domain.user.entity.UserEntity;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ public class SearchLog {
     private String keyword; // 검색 단어
 
     @Column(nullable = false, updatable = false)
+    @CreatedDate
     private LocalDateTime searchedAt; // 검색한 시점
 
     // DB 저장 전, 현재 시간 값으로 초기화
