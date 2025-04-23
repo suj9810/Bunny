@@ -1,0 +1,40 @@
+package sparta.bunny.domain.review.dto.response;
+
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import sparta.bunny.domain.review.entity.OwnerComment;
+import sparta.bunny.domain.review.entity.Review;
+
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ReviewFindResponse {
+	private long reviewId;
+	private long orderId;
+	private int rating;
+	private String content;
+	private LocalDateTime createdAt;
+	private LocalDateTime modifiedAt;
+	private String ownerComment;
+
+	public static ReviewFindResponse from(Review review, OwnerComment ownerComment) {
+		return ReviewFindResponse.builder()
+			.reviewId(review.getId())
+			.orderId(review.getOrder().getOrderId())
+			.rating(review.getRating())
+			.content(review.getContent())
+			.createdAt(review.getCreatedAt())
+			.modifiedAt(review.getModifiedAt())
+			.ownerComment(ownerComment != null ? ownerComment.getContent() : null)
+			.build();
+	}
+
+}
