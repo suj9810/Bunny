@@ -36,7 +36,7 @@ public class Stores {
     private String categoryName;
 
     // 가게 등록
-    public Store(User user, String storeName, String openTime, String closeTime, Integer minOrderPrice, String notice, Boolean isClosed, String categoryName){
+    public Stores(User user, String storeName, String openTime, String closeTime, Integer minOrderPrice, String notice, Boolean isClosed, String categoryName){
         this.user = user;
         this.storeName = storeName;
         this.openTime = LocalTime.parse(openTime);
