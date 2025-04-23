@@ -4,9 +4,11 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.response.CommonResponse;
+import sparta.bunny.domain.review.code.ReviewExceptionCode;
 import sparta.bunny.domain.review.code.ReviewSuccessCode;
 import sparta.bunny.domain.review.dto.response.ReviewCreateResponse;
 import sparta.bunny.domain.review.entity.Review;
+import sparta.bunny.domain.review.exception.ReviewException;
 import sparta.bunny.domain.review.repository.ReviewRepository;
 
 @Service
@@ -25,5 +27,12 @@ public class ReviewService {
 		ReviewCreateResponse createdReview = ReviewCreateResponse.builder().reviewId(saved.getId()).build();
 
 		return CommonResponse.of(ReviewSuccessCode.REVIEW_CREATE_SUCCESS, createdReview);
+	}
+
+	public CommonResponse getReview(Long id) {
+
+		Review review = reviewRepository.getReviewById(id)
+			.orElseThrow(() -> new ReviewException(ReviewExceptionCode.ALREADY_REVIEWED));
+
 	}
 }
