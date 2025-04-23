@@ -13,6 +13,7 @@ public class CommonResponse<T> {
 	private String message;
 	private T data;
 
+	// 성공
 	public static <T> CommonResponse<T> of(ResponseCode responseCode, T result) {
 		return CommonResponse.<T>builder()
 			.status(responseCode.getCode())
@@ -21,6 +22,7 @@ public class CommonResponse<T> {
 			.build();
 	}
 
+	// 실패
 	public static <T> CommonResponse<T> of(String status, String message) {
 		return CommonResponse.<T>builder()
 			.status(status)
@@ -28,17 +30,11 @@ public class CommonResponse<T> {
 			.build();
 	}
 
+	// 실패응답
 	public static <T> CommonResponse<T> from(ResponseCode responseCode) {
 		return CommonResponse.<T>builder()
 			.status(responseCode.getCode())
 			.message(responseCode.getMessage())
-			.build();
-	}
-
-	public static <T> CommonResponse<T> success(String statusCode, T result) {
-		return CommonResponse.<T>builder()
-			.status(statusCode)
-			.data(result)
 			.build();
 	}
 }
