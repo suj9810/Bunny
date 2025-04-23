@@ -1,6 +1,5 @@
 package sparta.bunny.common.exception.handler;
 
-import java.time.DateTimeException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;

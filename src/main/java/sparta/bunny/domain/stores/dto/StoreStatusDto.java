@@ -1,0 +1,14 @@
+package sparta.bunny.domain.stores.dto;
+
+import lombok.Getter;
+
+@Getter
+public class StoreStatusDto {
+
+	private Boolean isClosed;
+
+	public StoreStatusDto(Boolean isClosed) {
+		this.isClosed = isClosed;
+	}
+
+}
