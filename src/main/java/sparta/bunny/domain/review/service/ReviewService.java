@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.domain.review.code.ReviewSuccessCode;
+import sparta.bunny.domain.review.dto.request.ReviewCreateRequest;
 import sparta.bunny.domain.review.dto.response.ReviewCreateResponse;
 import sparta.bunny.domain.review.entity.Review;
 import sparta.bunny.domain.review.repository.ReviewRepository;
@@ -14,11 +15,8 @@ import sparta.bunny.domain.review.repository.ReviewRepository;
 public class ReviewService {
 	private final ReviewRepository reviewRepository;
 
-	public CommonResponse saveReview(String content) {
-
-		Review review = Review.builder()
-			.content(content)
-			.build();
+	public CommonResponse<ReviewCreateResponse> saveReview(ReviewCreateRequest request) {
+		Review review = Review.builder().content(request.getContent()).build();
 
 		Review saved = reviewRepository.save(review);
 
