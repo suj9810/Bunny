@@ -8,7 +8,7 @@ import sparta.bunny.order.enums.OrderStatus;
 import java.awt.*;
 
 @Getter
-@Entity
+@Entity(name = "order")
 public class Order {
 
     @Id
