@@ -1,7 +1,5 @@
 package sparta.bunny.user.entity;
 
-import org.hibernate.usertype.UserType;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -35,7 +33,7 @@ public class UserEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private UserType userType;
+	private UserRole userRole; // UserType이 겹쳐서 이름 수정
 
 	// // 나중에 추가할 소셜 로그인
 	// @Enumerated(EnumType.STRING)
