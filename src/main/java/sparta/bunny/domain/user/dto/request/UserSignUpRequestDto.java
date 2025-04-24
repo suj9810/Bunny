@@ -1,11 +1,17 @@
-package sparta.bunny.user.dto;
+package sparta.bunny.domain.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import sparta.bunny.user.entity.UserRole;
+import lombok.NoArgsConstructor;
+import sparta.bunny.domain.user.entity.UserRole;
 
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserSignUpRequestDto {
 
 	@NotBlank(message = "이메일은 필수입니다.")
@@ -18,9 +24,10 @@ public class UserSignUpRequestDto {
 	@NotBlank(message = "닉네임은 필수입니다.")
 	private String nickname;
 
-	@NotBlank(message = "회원 구분은 필수입니다.")
+	@NotNull(message = "회원 구분은 필수입니다.")
 	private UserRole userRole;
 
 	@NotBlank(message = "전화번호는 필수입니다.")
+	@Pattern(regexp = "\\d{3}-\\d{4}-\\d{4}", message = "전화번호 형식이 올바르지 않습니다.")
 	private String userNumber;
 }
