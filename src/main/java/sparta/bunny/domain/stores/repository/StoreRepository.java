@@ -17,5 +17,5 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     // 카테고리별 가게 조회(폐업한 가게는 빼고)
     List<Store> findAllByCategoryNameAndIsClosedFalse(String categoryName);
 
-    Optional<Store> findByStoreId(Long storeId);
+    Optional<Store> findById(Long Id);
 }

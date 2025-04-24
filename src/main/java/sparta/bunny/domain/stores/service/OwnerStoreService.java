@@ -42,7 +42,7 @@ public class OwnerStoreService {
     // 가게 수정
     @Transactional
     public void updateStore(Long storeId, StoreRequestDto requestDto) {
-        Store store = storeRepository.findByStoreId(storeId).orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
         store.updateStore(
                 requestDto.getStoreName(),
                 requestDto.getOpenTime(),
@@ -56,14 +56,14 @@ public class OwnerStoreService {
     //가게 폐업 처리
     @Transactional
     public void closeStore(Long storeId) {
-        Store store = storeRepository.findByStoreId(storeId).orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
         store.close();
     }
 
     // 가게 폐업 해제
     @Transactional
     public void reopenStore(Long storeId) {
-        Store store = storeRepository.findByStoreId(storeId).orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
         store.reopen();
     }
 

@@ -3,7 +3,6 @@ package sparta.bunny.domain.stores.entity;
 import java.time.LocalTime;
 
 import lombok.Builder;
-import org.apache.catalina.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +13,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sparta.bunny.domain.user.entity.User;
 
 @Getter
 @NoArgsConstructor
