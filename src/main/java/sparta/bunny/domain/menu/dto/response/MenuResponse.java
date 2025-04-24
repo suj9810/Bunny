@@ -10,7 +10,7 @@ import lombok.Getter;
 @Builder
 // @NoArgsConstructor
 @AllArgsConstructor
-public class MenuCreateResponse {
+public class MenuResponse {
 
 	private final Long menuId;
 	private final String name;
