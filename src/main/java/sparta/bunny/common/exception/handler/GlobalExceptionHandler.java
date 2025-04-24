@@ -32,7 +32,8 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<CommonResponses<ValidationError>> inputValidationExceptionHandler(BindingResult result) {
 		log.error(result.getFieldErrors().toString());
 
-		List<ValidationError> validationErrors = result.getFieldErrors().stream()
+		List<ValidationError> validationErrors = result.getFieldErrors()
+			.stream()
 			.map(fieldError -> ValidationError.builder()
 				.field(fieldError.getField())
 				.message(fieldError.getDefaultMessage())
@@ -41,7 +42,6 @@ public class GlobalExceptionHandler {
 			.toList();
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(CommonResponses.of(HttpStatus.BAD_REQUEST.name(), "잘못된 요청입니다.",
-				validationErrors));
+			.body(CommonResponses.of(HttpStatus.BAD_REQUEST.name(), "잘못된 요청입니다.", validationErrors));
 	}
 }
