@@ -1,70 +1,98 @@
 package sparta.bunny.common.aop;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor
 @Aspect
 @Component
 public class LogAop {
-	@Pointcut("execution(* sparta.bunny.domain..*Controller.*(..))")
-	private void logPointcut() {
+
+	private final ObjectMapper objectMapper;
+
+	@Pointcut("execution(* sparta.bunny.domain..*Controller.*(..)))")
+	private void loggingPointcut() {
 	}
 
-	@Before("logPointcut()")
-	public void logBefore(JoinPoint joinPoint) {
-		Method method = getMethod(joinPoint);
-		log.info("메서드 실행 전");
-		getMethodInfo(method);
-
-		Object[] args = joinPoint.getArgs();
-		if (args.length == 0) {
-			log.info("no parameters");
-		} else {
-			getParameterInfo(method, args);
+	@Around("loggingPointcut()")
+	public Object logging(ProceedingJoinPoint joinPoint) throws Throwable {
+		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+		if (attributes == null) {
+			log.warn("No request attributes available.");
+			return joinPoint.proceed();
 		}
-	}
+		HttpServletRequest request = attributes.getRequest();
 
-	@AfterReturning(value = "logPointcut()", returning = "returnObject")
-	public void logAfterReturning(JoinPoint joinPoint, Object returnObject) {
-		Method method = getMethod(joinPoint);
-		log.info("메서드 실행 후");
-		getMethodInfo(method);
-		log.info("return type : {}", returnObject.getClass().getSimpleName());
-	}
-
-	private Method getMethod(JoinPoint joinPoint) {
 		MethodSignature signature = (MethodSignature)joinPoint.getSignature();
+		Method method = signature.getMethod();
+		String[] parameterNames = signature.getParameterNames();
+		Object[] args = joinPoint.getArgs();
+		String requestUri = request.getRequestURI();
+		LocalDateTime requestTime = LocalDateTime.now();
+		Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
-		return signature.getMethod();
-	}
+		Map<String, Object> pathVariables = new LinkedHashMap<>();
+		Map<String, Object> requestBodies = new LinkedHashMap<>();
+		Map<String, Object> requestParams = new LinkedHashMap<>();
 
-	private void getMethodInfo(Method method) {
-		log.info("Method name = {}", method.getName());
-	}
+		for (int i = 0; i < args.length; i++) {
+			Object value = (args[i] == null) ? "null" : args[i];
 
-	private void getParameterInfo(Method method, Object[] args) {
-		Parameter[] parameters = method.getParameters();
-		for (int i = 0; i < parameters.length; i++) {
-			String parameterName = parameters[i].getName();
-			Object arg = (args != null && args[i] != null) ? args[i] : null;
-
-			if (arg == null) {
-				log.info("parameter {} is null", parameterName);
-			} else {
-				log.info("parameter {} : {}", arg.getClass().getSimpleName(), parameterName);
+			for (Annotation annotation : parameterAnnotations[i]) {
+				// PathVariable 분리
+				if (annotation.annotationType() == PathVariable.class) {
+					pathVariables.put(parameterNames[i], value);
+					// RequestBody 분리
+				} else if (annotation.annotationType() == RequestBody.class) {
+					requestBodies.put(parameterNames[i], value);
+					// RequestParam 분리
+				} else if (annotation.annotationType() == RequestParam.class) {
+					requestParams.put(parameterNames[i], value);
+				}
 			}
 		}
-	}
 
+		String path = objectMapper.writeValueAsString(pathVariables);
+		String body = objectMapper.writeValueAsString(requestBodies);
+		String param = objectMapper.writeValueAsString(requestParams);
+
+		log.info("[Request] | time = {} | URL = {}", requestTime, requestUri);
+		log.info("[Method Name] = {}", method.getName());
+		log.info("[RequestBody] = {}", body);
+		log.info("[PathVariable] = {}", path);
+		log.info("[RequestParam] = {}", param);
+
+		Object response = null;
+		try {
+			response = joinPoint.proceed();
+			log.info("[ResponseBody] = {}", objectMapper.writeValueAsString(response));
+			return response;
+		} catch (Throwable ex) {
+			log.error("[Exception] | time = {} | URL = {}", requestTime, requestUri);
+			log.error("[Exception Message] = {}", ex.getMessage(), ex);
+			throw ex;
+		}
+	}
 }
