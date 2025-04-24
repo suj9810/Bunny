@@ -45,9 +45,10 @@ public class ReviewController {
 	 */
 	@PostMapping
 	public ResponseEntity<?> createReviewWithImages(
-		@ModelAttribute ReviewCreateRequest dto
+		@ModelAttribute ReviewCreateRequest dto,
+		@RequestParam("id") Long id
 	) throws IOException {
-		CommonResponse<ReviewCreateResponse> response = reviewService.saveReview(dto);
+		CommonResponse<ReviewCreateResponse> response = reviewService.saveReview(dto, id);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 

@@ -40,7 +40,7 @@ public class ReviewService {
 	private final ImageRepository imageRepository;
 
 	@Transactional
-	public CommonResponse<ReviewCreateResponse> saveReview(ReviewCreateRequest request) throws IOException {
+	public CommonResponse<ReviewCreateResponse> saveReview(ReviewCreateRequest request, Long id) throws IOException {
 
 		Review review = Review.builder().content(request.getContent()).rating(request.getRating()).build();
 
@@ -64,7 +64,7 @@ public class ReviewService {
 
 	public CommonResponses<ReviewFindResponse> getReviewsByStoreId(Long storeId, Pageable pageable, Integer minRating,
 		Integer maxRating) {
-		Page<Review> page = reviewRepository.findByStoresIdAndRatingBetween(storeId, minRating, maxRating, pageable);
+		Page<Review> page = reviewRepository.findByStoreIdAndRatingBetween(storeId, minRating, maxRating, pageable);
 
 		List<Review> reviews = page.getContent();
 
