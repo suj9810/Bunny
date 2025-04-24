@@ -31,7 +31,7 @@ import sparta.bunny.domain.stores.entity.Stores;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Menus extends BaseEntity {
+public class Menu extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
