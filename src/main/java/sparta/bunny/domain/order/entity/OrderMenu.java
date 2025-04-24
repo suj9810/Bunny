@@ -10,27 +10,31 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sparta.bunny.common.audit.BaseEntity;
+import sparta.bunny.domain.menu.entity.Menus;
 
 @Getter
 @Entity
 @Table(name = "orderMenus")
 @NoArgsConstructor
-public class OrderMenu {
+public class OrderMenu extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long orderMenuId;
+	private Long id;
 
-	@Column
-	private int orderCnt;
+	// 주문
+	@ManyToOne
+	@JoinColumn(name = "order_id")
+	private Order order;
 
 	// 메뉴
 	@ManyToOne
 	@JoinColumn(name = "menu_id")
 	private Menus menus;
 
-	// 주문
-	@ManyToOne
-	@JoinColumn(name = "order_id")
-	private Order order;
+	private int orderCnt;
+
+	private int totalPrice;
+
 }
