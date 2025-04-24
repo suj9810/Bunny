@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -61,17 +62,20 @@ public class LogAop {
 			Object value = (args[i] == null) ? "null" : args[i];
 
 			for (Annotation annotation : parameterAnnotations[i]) {
-				// PathVariable 분리
-				if (annotation.annotationType() == PathVariable.class) {
+				if (annotation.annotationType() == RequestBody.class
+					|| annotation.annotationType() == RequestParam.class) {
+
+					if (value instanceof MultipartFile) {
+						requestBodies.put(parameterNames[i], "파일 업로드 (MultipartFile)");
+					} else {
+						requestBodies.put(parameterNames[i], value);
+					}
+
+				} else if (annotation.annotationType() == PathVariable.class) {
 					pathVariables.put(parameterNames[i], value);
-					// RequestBody 분리
-				} else if (annotation.annotationType() == RequestBody.class) {
-					requestBodies.put(parameterNames[i], value);
-					// RequestParam 분리
-				} else if (annotation.annotationType() == RequestParam.class) {
-					requestParams.put(parameterNames[i], value);
 				}
 			}
+
 		}
 
 		String path = objectMapper.writeValueAsString(pathVariables);

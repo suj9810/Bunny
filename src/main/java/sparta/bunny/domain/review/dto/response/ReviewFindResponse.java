@@ -1,6 +1,7 @@
 package sparta.bunny.domain.review.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sparta.bunny.domain.review.entity.Image;
 import sparta.bunny.domain.review.entity.OwnerComment;
 import sparta.bunny.domain.review.entity.Review;
 
@@ -24,16 +26,18 @@ public class ReviewFindResponse {
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 	private String ownerComment;
+	private List<String> imageUrls;
 
-	public static ReviewFindResponse from(Review review, OwnerComment ownerComment) {
+	public static ReviewFindResponse from(Review review, OwnerComment ownerComment, List<Image> images) {
 		return ReviewFindResponse.builder()
 			.reviewId(review.getId())
-			.orderId(review.getOrder().getOrderId())
+			.orderId(review.getOrder().getId())
 			.rating(review.getRating())
 			.content(review.getContent())
 			.createdAt(review.getCreatedAt())
 			.modifiedAt(review.getModifiedAt())
 			.ownerComment(ownerComment != null ? ownerComment.getContent() : null)
+			.imageUrls(images == null || images.isEmpty() ? null : images.stream().map(Image::getImgUrl).toList())
 			.build();
 	}
 
