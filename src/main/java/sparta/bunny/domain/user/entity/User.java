@@ -18,7 +18,7 @@ import sparta.bunny.common.audit.BaseEntity;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserEntity extends BaseEntity {
+public class User extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +49,7 @@ public class UserEntity extends BaseEntity {
 	private Boolean isDeleted = false;
 
 	@Builder
-	public UserEntity(String userEmail, String userPassword, String nickname, UserRole userRole, String userNumber,
+	public User(String userEmail, String userPassword, String nickname, UserRole userRole, String userNumber,
 		Boolean isDeleted) {
 		this.userEmail = userEmail;
 		this.userPassword = userPassword;
