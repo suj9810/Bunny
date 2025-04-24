@@ -55,33 +55,46 @@ public class OwnerStoreService {
 
     //가게 폐업 처리
     @Transactional
-    public void closeStore(Long storeId) {
-        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
-        store.close();
-    }
-
-    // 가게 폐업 해제
-    @Transactional
-    public void reopenStore(Long storeId) {
-        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
-        store.reopen();
+    public void closeStore(Long storeId, boolean closure) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
+        if (closure) {
+            store.close();  // 폐업 처리
+        } else {
+            store.reopen();  // 폐업 해제 처리
+        }
     }
 
     // 전체 가게 조회(폐업한 가게 제외)
     @Transactional(readOnly = true)
-    public List<StoreResponseDto> getAllStores() {
-        return storeRepository.findAllByIsClosedFalse().stream()
-                .map(store -> new StoreResponseDto(
-                        store.getId(),
-                        store.getStoreName(),
-                        store.getOpenTime(),
-                        store.getCloseTime(),
-                        store.getMinOrderPrice(),
-                        store.getNotice(),
-                        store.getIsClosed(),
-                        store.getCategoryName()
-                ))
-                .collect(Collectors.toList());
+    public List<StoreResponseDto> getAllStores(String categoryName, int page, int size) {
+        if (categoryName != null) {
+            return storeRepository.findAllByCategoryNameAndIsClosedFalse(categoryName).stream()
+                    .map(store -> new StoreResponseDto(
+                            store.getId(),
+                            store.getStoreName(),
+                            store.getOpenTime(),
+                            store.getCloseTime(),
+                            store.getMinOrderPrice(),
+                            store.getNotice(),
+                            store.getIsClosed(),
+                            store.getCategoryName()
+                    ))
+                    .collect(Collectors.toList());
+        } else {
+            return storeRepository.findAllByIsClosedFalse().stream()
+                    .map(store -> new StoreResponseDto(
+                            store.getId(),
+                            store.getStoreName(),
+                            store.getOpenTime(),
+                            store.getCloseTime(),
+                            store.getMinOrderPrice(),
+                            store.getNotice(),
+                            store.getIsClosed(),
+                            store.getCategoryName()
+                    ))
+                    .collect(Collectors.toList());
+        }
     }
 
 //    // 단일 가게 조회(메뉴 포함)
