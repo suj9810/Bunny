@@ -28,7 +28,7 @@ public class MenuOption extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "menu_id", nullable = false)
-	private Menus menus;
+	private Menu menus;
 
 	@Column(nullable = false)
 	private String name;
