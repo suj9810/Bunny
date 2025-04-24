@@ -11,8 +11,7 @@ public class LogUtils {
 		}
 
 		StackTraceElement firstStackTrace = throwable.getStackTrace()[0];
-		log.error("발생 위치: {}:{} - Thread: {}, Method: {}",
-			firstStackTrace.getClassName(), firstStackTrace.getLineNumber(),
-			Thread.currentThread().getName(), firstStackTrace.getMethodName());
+		log.error("발생 위치: {}:{} - Thread: {}, Method: {}", firstStackTrace.getClassName(),
+			firstStackTrace.getLineNumber(), Thread.currentThread().getName(), firstStackTrace.getMethodName());
 	}
 }
