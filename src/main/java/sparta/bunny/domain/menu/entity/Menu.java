@@ -23,7 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
 import sparta.bunny.domain.menu.enums.Status;
-import sparta.bunny.domain.stores.entity.Stores;
+import sparta.bunny.domain.stores.entity.Store;
 
 @Entity
 @Table(name = "menus")
@@ -39,7 +39,7 @@ public class Menu extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "store_id", nullable = false)
-	private Stores store;
+	private Store store;
 
 	@Column(nullable = false, length = 100)
 	private String name;

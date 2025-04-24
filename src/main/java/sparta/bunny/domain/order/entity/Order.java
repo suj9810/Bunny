@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
 import sparta.bunny.domain.order.enums.OrderStatus;
-import sparta.bunny.domain.stores.entity.Stores;
-import sparta.bunny.domain.user.entity.UserEntity;
+import sparta.bunny.domain.stores.entity.Store;
+import sparta.bunny.domain.user.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,12 +25,12 @@ public class Order extends BaseEntity {
 	// 유저 ManyToOne
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	private UserEntity user;
+	private User user;
 
 	// 가게 ManyToOne
 	@ManyToOne
 	@JoinColumn(name = "store_id")
-	private Stores store;
+	private Store store;
 
 	private LocalDateTime orderedAt = LocalDateTime.now();
 

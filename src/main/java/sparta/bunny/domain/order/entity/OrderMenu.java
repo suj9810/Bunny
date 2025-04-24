@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
-import sparta.bunny.domain.menu.entity.Menus;
+import sparta.bunny.domain.menu.entity.Menu;
 
 @Getter
 @Entity
@@ -31,7 +31,7 @@ public class OrderMenu extends BaseEntity {
 	// 메뉴
 	@ManyToOne
 	@JoinColumn(name = "menu_id")
-	private Menus menus;
+	private Menu menus;
 
 	private int orderCnt;
 

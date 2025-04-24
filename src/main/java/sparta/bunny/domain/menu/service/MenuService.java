@@ -20,7 +20,7 @@ import sparta.bunny.domain.menu.enums.Status;
 import sparta.bunny.domain.menu.exception.MenuException;
 import sparta.bunny.domain.menu.repository.MenuOptionRepository;
 import sparta.bunny.domain.menu.repository.MenuRepository;
-import sparta.bunny.domain.stores.entity.Stores;
+import sparta.bunny.domain.stores.entity.Store;
 import sparta.bunny.domain.stores.repository.StoreRepository;
 
 @Service
@@ -34,7 +34,7 @@ public class MenuService {
 	@Transactional
 	public CommonResponse<MenuResponse> saveMenu(MenuCreateRequest request) {
 
-		Stores store = storeRepository.findById(request.getStoreId())
+		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new MenuException(MenuExceptionCode.NOT_FOUND_STORE));
 
 		Menu menu = Menu.builder()
