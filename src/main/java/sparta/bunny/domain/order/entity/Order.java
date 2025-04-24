@@ -1,16 +1,26 @@
 package sparta.bunny.domain.order.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
 import sparta.bunny.domain.order.enums.OrderStatus;
-import sparta.bunny.domain.stores.entity.Stores;
-import sparta.bunny.domain.user.entity.UserEntity;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import sparta.bunny.domain.stores.entity.Store;
+import sparta.bunny.domain.user.entity.User;
 
 @Getter
 @Entity
@@ -25,12 +35,12 @@ public class Order extends BaseEntity {
 	// 유저 ManyToOne
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	private UserEntity user;
+	private User user;
 
 	// 가게 ManyToOne
 	@ManyToOne
 	@JoinColumn(name = "store_id")
-	private Stores store;
+	private Store store;
 
 	private LocalDateTime orderedAt = LocalDateTime.now();
 
