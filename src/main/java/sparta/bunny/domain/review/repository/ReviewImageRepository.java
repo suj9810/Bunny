@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import sparta.bunny.domain.review.entity.ReviewImage;
 
-public interface ImageRepository extends JpaRepository<ReviewImage, Long> {
+public interface ReviewImageRepository extends JpaRepository<ReviewImage, Long> {
 	List<ReviewImage> findAllByReviewId(Long reviewId);
 }
