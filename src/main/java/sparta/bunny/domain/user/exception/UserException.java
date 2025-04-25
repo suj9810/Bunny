@@ -14,6 +14,6 @@ public class UserException extends BaseException {
 
 	public UserException(ResponseCode responseCode) {
 		this.responseCode = responseCode;
-		this.httpStatus = getHttpStatus();
+		this.httpStatus = responseCode.getHttpStatus();
 	}
 }

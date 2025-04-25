@@ -28,7 +28,7 @@ public class UserController {
 	 * @param requestDto
 	 * @return
 	 */
-	@PostMapping
+	@PostMapping("/signup")
 	public ResponseEntity<CommonResponse<Object>> signup(
 		@Valid @RequestBody UserSignUpRequestDto requestDto) {
 

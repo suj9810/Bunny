@@ -16,6 +16,7 @@ import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.common.response.CommonResponses;
 import sparta.bunny.common.response.ResponseCode;
 import sparta.bunny.common.util.LogUtils;
+import sparta.bunny.domain.user.exception.UserException;
 
 @Slf4j
 @RestControllerAdvice
@@ -43,5 +44,15 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 			.body(CommonResponses.of(HttpStatus.BAD_REQUEST.name(), "잘못된 요청입니다.", validationErrors));
+	}
+
+	// 토큰이 가로챈 오류 응답 코드
+	@ExceptionHandler(UserException.class)
+	public ResponseEntity<CommonResponse<?>> handleUserException(UserException e) {
+
+		return ResponseEntity
+			.status(e.getHttpStatus())
+			.body(CommonResponse.of(e.getResponseCode(), null));
+
 	}
 }
