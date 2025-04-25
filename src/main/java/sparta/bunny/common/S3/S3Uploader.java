@@ -40,7 +40,7 @@ public class S3Uploader {
 
 	// 실제 업로드 로직 (디렉토리명 포함된 파일명 생성 → S3 업로드 → 로컬 파일 삭제 → URL 반환)
 	private String upload(File uploadFile, String dirName) {
-		// 예: images/uuid_filename.png
+		// 예: reviewImages/uuid_filename.png
 		String fileName = dirName + "/" + changedImageName(uploadFile.getName());
 		// S3 업로드 및 URL 반환
 		String uploadImageUrl = putS3(uploadFile, fileName);
@@ -105,7 +105,7 @@ public class S3Uploader {
 	private String extractKeyFromUrl(String fileUrl) {
 		// "https://bucket-name.s3.region.amazonaws.com/" 다음부터가 key
 		int startIndex = fileUrl.indexOf(".com/") + 5;
-		return fileUrl.substring(startIndex); // images/xxx.png
+		return fileUrl.substring(startIndex); // reviewImages/xxx.png
 	}
 
 }

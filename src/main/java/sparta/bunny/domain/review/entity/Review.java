@@ -54,5 +54,5 @@ public class Review extends BaseEntity {
 	private Order order;
 
 	@OneToMany(mappedBy = "review", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Image> images = new ArrayList<>();
+	private List<ReviewImage> reviewImages = new ArrayList<>();
 }

@@ -24,9 +24,9 @@ import sparta.bunny.domain.review.dto.request.ReviewCreateRequest;
 import sparta.bunny.domain.review.dto.request.ReviewDeleteRequestDto;
 import sparta.bunny.domain.review.dto.response.ReviewCreateResponse;
 import sparta.bunny.domain.review.dto.response.ReviewFindResponse;
-import sparta.bunny.domain.review.entity.Image;
 import sparta.bunny.domain.review.entity.OwnerComment;
 import sparta.bunny.domain.review.entity.Review;
+import sparta.bunny.domain.review.entity.ReviewImage;
 import sparta.bunny.domain.review.exception.ReviewException;
 import sparta.bunny.domain.review.repository.ImageRepository;
 import sparta.bunny.domain.review.repository.OwnerCommentRepository;
@@ -40,10 +40,8 @@ import sparta.bunny.domain.user.repository.UserRepository;
 @RequiredArgsConstructor
 public class ReviewService {
 
-	// 최대 파일 크기 5MB
 	private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-	// 레포지토리
 	private final ReviewRepository reviewRepository;
 	private final OwnerCommentRepository ownerCommentRepository;
 	private final UserRepository userRepository;
@@ -83,9 +81,9 @@ public class ReviewService {
 				validateImageExtension(file);
 				String url = s3Uploader.upload(file, "images");
 
-				Image image = Image.builder().imgUrl(url).review(saved).build();
+				ReviewImage reviewImage = ReviewImage.builder().imgUrl(url).review(saved).build();
 
-				imageRepository.save(image);
+				imageRepository.save(reviewImage);
 			}
 		}
 
@@ -104,7 +102,7 @@ public class ReviewService {
 		List<ReviewFindResponse> responses = new ArrayList<>();
 		for (Review review : reviews) {
 			OwnerComment ownerComment = ownerCommentRepository.findByReviewId(review.getId()).orElse(null);
-			responses.add(ReviewFindResponse.from(review, ownerComment, review.getImages()));
+			responses.add(ReviewFindResponse.from(review, ownerComment, review.getReviewImages()));
 		}
 
 		Page<ReviewFindResponse> responsePage = new PageImpl<>(responses, pageable, page.getTotalElements());
@@ -127,18 +125,21 @@ public class ReviewService {
 
 		ownerCommentRepository.findByReviewId(dto.getReviewId()).ifPresent(ownerCommentRepository::delete);
 
-		List<Image> images = imageRepository.findAllByReviewId(dto.getReviewId());
-		for (Image image : images) {
-			String imageUrl = image.getImgUrl();
+		List<ReviewImage> reviewImages = imageRepository.findAllByReviewId(dto.getReviewId());
+		for (ReviewImage reviewImage : reviewImages) {
+			String imageUrl = reviewImage.getImgUrl();
 			s3Uploader.delete(imageUrl); // S3에서 삭제
 		}
 
-		imageRepository.deleteAll(images); // DB에서 삭제
+		imageRepository.deleteAll(reviewImages); // DB에서 삭제
 
 		reviewRepository.delete(review);
 	}
 
-	// 파일 확장자, 크기 검사
+	/**
+	 * 파일 확장자, 크기 검사
+	 * @param file
+	 */
 	private void validateImageExtension(MultipartFile file) {
 		String originalFilename = file.getOriginalFilename();
 
