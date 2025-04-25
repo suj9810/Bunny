@@ -3,6 +3,8 @@ package sparta.bunny.domain.review.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -99,17 +101,21 @@ public class ReviewService {
 
 		List<Review> reviews = page.getContent();
 
+		List<Long> reviewIds = reviews.stream()
+			.map(Review::getId)
+			.toList();
+
+		List<OwnerComment> ownerComments = ownerCommentRepository.findAllByReviewIdIn(reviewIds);
+		Map<Long, OwnerComment> commentMap = ownerComments.stream()
+			.collect(Collectors.toMap(c -> c.getReview().getId(), c -> c));
+
 		List<ReviewFindResponse> responses = new ArrayList<>();
 		for (Review review : reviews) {
-			OwnerComment ownerComment = ownerCommentRepository.findByReviewId(review.getId()).orElse(null);
+			OwnerComment ownerComment = commentMap.get(review.getId());
 			responses.add(ReviewFindResponse.from(review, ownerComment, review.getReviewImages()));
 		}
 
 		Page<ReviewFindResponse> responsePage = new PageImpl<>(responses, pageable, page.getTotalElements());
-
-		for (ReviewFindResponse reviewFindResponse : responsePage) {
-			System.out.println("reviewFindResponse = " + reviewFindResponse.getImageUrls());
-		}
 
 		return CommonResponses.of(ReviewSuccessCode.REVIEW_FOUND_SUCCESS, responsePage);
 	}
