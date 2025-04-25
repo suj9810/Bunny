@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import sparta.bunny.domain.user.CustomPasswordEncoder;
 import sparta.bunny.domain.user.code.UserErrorCode;
-import sparta.bunny.domain.user.config.PasswordEncoder;
 import sparta.bunny.domain.user.dto.request.UserSignUpRequestDto;
 import sparta.bunny.domain.user.dto.response.UserResponseDto;
 import sparta.bunny.domain.user.entity.User;
@@ -17,7 +17,7 @@ import sparta.bunny.domain.user.repository.UserRepository;
 public class UserService {
 
 	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
+	private final CustomPasswordEncoder passwordEncoder;
 
 	/**
 	 * 회원가입
@@ -29,7 +29,7 @@ public class UserService {
 	public UserResponseDto signup(UserSignUpRequestDto request) {
 
 		// 이메일 중복 검사
-		if (userRepository.existsByUserEmail(request.getEmail())) {
+		if (userRepository.existsByEmail(request.getEmail())) {
 			throw new UserException(UserErrorCode.DUPLICATE_EMAIL);
 		}
 
@@ -41,18 +41,19 @@ public class UserService {
 
 		// 유저 생성 및 저장
 		User user = User.builder()
-			.userEmail(request.getEmail())
-			.userPassword(encodedPassword)
+			.email(request.getEmail())
+			.password(encodedPassword)
 			.nickname(request.getNickname())
 			.userRole(request.getUserRole())
 			.userNumber(request.getUserNumber())
+			.isDeleted(false)
 			.build();
 
 		User savedUser = userRepository.save(user);
 
 		return UserResponseDto.builder()
-			.userId(savedUser.getUserId())
-			.userEmail(savedUser.getUserEmail())
+			.userId(savedUser.getId())
+			.userEmail(savedUser.getEmail())
 			.userNum(savedUser.getUserNumber())
 			.nickName(savedUser.getNickname())
 			.build();
@@ -72,14 +73,19 @@ public class UserService {
 		}
 	}
 
+	/**
+	 * 회원 조회
+	 * @param userId
+	 * @return
+	 */
 	@Transactional(readOnly = true)
 	public UserResponseDto getUserById(Long userId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		return UserResponseDto.builder()
-			.userId(user.getUserId())
-			.userEmail(user.getUserEmail())
+			.userId(user.getId())
+			.userEmail(user.getEmail())
 			.userNum(user.getUserNumber())
 			.nickName(user.getNickname())
 			.build();

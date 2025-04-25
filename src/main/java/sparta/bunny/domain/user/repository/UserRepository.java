@@ -8,7 +8,7 @@ import sparta.bunny.domain.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	boolean existsByUserEmail(String email);
+	boolean existsByEmail(String email);
 
-	Optional<User> findByUserEmail(String email);
+	Optional<User> findByEmail(String email);
 }
