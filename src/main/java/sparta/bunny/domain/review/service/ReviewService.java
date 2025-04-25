@@ -33,9 +33,6 @@ import sparta.bunny.domain.review.exception.ReviewException;
 import sparta.bunny.domain.review.repository.ImageRepository;
 import sparta.bunny.domain.review.repository.OwnerCommentRepository;
 import sparta.bunny.domain.review.repository.ReviewRepository;
-import sparta.bunny.domain.user.code.UserErrorCode;
-import sparta.bunny.domain.user.entity.User;
-import sparta.bunny.domain.user.exception.UserException;
 import sparta.bunny.domain.user.repository.UserRepository;
 
 @Service
@@ -54,12 +51,9 @@ public class ReviewService {
 	private final ImageRepository imageRepository;
 
 	@Transactional
-	public CommonResponse<ReviewCreateResponse> saveReview(ReviewCreateRequest request,
-		UserDetailsImpl userDetails) throws
-		IOException {
-
-		User user = userRepository.findById(userDetails.getUser().getId())
-			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+	public CommonResponse<ReviewCreateResponse> saveReview(
+		ReviewCreateRequest request, UserDetailsImpl userDetails
+	) throws IOException {
 
 		Order order = orderRepository.findById(request.getOrderId())
 			.orElseThrow(() -> new RuntimeException("주문 정보가 일치하지 않습니다.")); // Todo - Order Exception 사용하기
@@ -71,13 +65,14 @@ public class ReviewService {
 		Review review = Review.builder()
 			.content(request.getContent())
 			.rating(request.getRating())
-			.user(user)
+			.user(userDetails.getUser())
 			.order(order)
 			.store(order.getStore())
 			.build();
 
 		Review saved = reviewRepository.save(review);
 
+		// Todo - 서비스 분리
 		if (request.getFiles() != null && !request.getFiles().isEmpty()) {
 			for (MultipartFile file : request.getFiles()) {
 				validateImageExtension(file);
@@ -101,9 +96,7 @@ public class ReviewService {
 
 		List<Review> reviews = page.getContent();
 
-		List<Long> reviewIds = reviews.stream()
-			.map(Review::getId)
-			.toList();
+		List<Long> reviewIds = reviews.stream().map(Review::getId).toList();
 
 		List<OwnerComment> ownerComments = ownerCommentRepository.findAllByReviewIdIn(reviewIds);
 		Map<Long, OwnerComment> commentMap = ownerComments.stream()
@@ -125,9 +118,7 @@ public class ReviewService {
 		Review review = reviewRepository.findById(dto.getReviewId())
 			.orElseThrow(() -> new ReviewException(ReviewExceptionCode.REVIEW_NOT_FOUND));
 
-		if (!userDetails.getUser().getId().equals(review.getUser().getId())) {
-			throw new ReviewException(ReviewExceptionCode.NOT_OWNER_OF_REVIEW);
-		}
+		review.validateOwner(userDetails.getUser());
 
 		ownerCommentRepository.findByReviewId(dto.getReviewId()).ifPresent(ownerCommentRepository::delete);
 
@@ -136,8 +127,6 @@ public class ReviewService {
 			String imageUrl = reviewImage.getImgUrl();
 			s3Uploader.delete(imageUrl); // S3에서 삭제
 		}
-
-		imageRepository.deleteAll(reviewImages); // DB에서 삭제
 
 		reviewRepository.delete(review);
 	}

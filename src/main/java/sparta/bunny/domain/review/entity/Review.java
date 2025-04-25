@@ -21,6 +21,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
 import sparta.bunny.domain.order.entity.Order;
+import sparta.bunny.domain.review.code.ReviewExceptionCode;
+import sparta.bunny.domain.review.exception.ReviewException;
 import sparta.bunny.domain.stores.entity.Store;
 import sparta.bunny.domain.user.entity.User;
 
@@ -55,4 +57,14 @@ public class Review extends BaseEntity {
 
 	@OneToMany(mappedBy = "review", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ReviewImage> reviewImages = new ArrayList<>();
+
+	/**
+	 * 리뷰 작성자 확인
+	 * @param user user
+	 */
+	public void validateOwner(User user) {
+		if (!user.getId().equals(this.getUser().getId())) {
+			throw new ReviewException(ReviewExceptionCode.NOT_OWNER_OF_REVIEW);
+		}
+	}
 }
