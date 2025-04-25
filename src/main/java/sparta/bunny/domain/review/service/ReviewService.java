@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import sparta.bunny.common.S3.S3Uploader;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.common.response.CommonResponses;
 import sparta.bunny.common.service.FileService;
@@ -37,15 +36,11 @@ import sparta.bunny.domain.review.repository.ReviewRepository;
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
-
-	private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
-
 	private final ReviewRepository reviewRepository;
 	private final OwnerCommentRepository ownerCommentRepository;
 	private final OrderRepository orderRepository;
 
 	// S3
-	private final S3Uploader s3Uploader;
 	private final ReviewImageRepository reviewImageRepository;
 
 	private final FileService fileService;
@@ -72,6 +67,7 @@ public class ReviewService {
 
 		Review saved = reviewRepository.save(review);
 
+		// 이미지 업로드
 		List<ReviewImage> reviewImages = fileService.uploadAndCreateEntities(
 			request.getFiles(),
 			"review-images",
