@@ -98,7 +98,7 @@ public class S3Uploader {
 		try {
 			amazonS3Client.deleteObject(bucket, decodedKey);
 		} catch (Exception e) {
-			log.error("S3 삭제 중 예외 발생", e);
+			throw new RuntimeException("이미지 삭제에 실패하였습니다.");
 		}
 	}
 
