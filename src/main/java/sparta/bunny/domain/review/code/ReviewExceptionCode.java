@@ -9,6 +9,7 @@ import sparta.bunny.common.response.ResponseCode;
 @Getter
 @RequiredArgsConstructor
 public enum ReviewExceptionCode implements ResponseCode {
+	
 	ALREADY_REVIEWED(false, HttpStatus.CONFLICT, "이미 리뷰가 등록되었습니다.", "ALREADY_REVIEWED"),
 	DELIVERY_NOT_COMPLETE(false, HttpStatus.BAD_REQUEST, "아직 배달이 진행중입니다.", "DELIVERY_NOT_COMPLETE"),
 	NOT_OWNER_OF_ORDER(false, HttpStatus.FORBIDDEN, "자신의 주문이 아닙니다.", "NOT_OWNER_OF_ORDER"),

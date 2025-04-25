@@ -2,6 +2,7 @@ package sparta.bunny.domain.review.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import sparta.bunny.domain.review.service.OwnerReviewService;
 @RestController
 @RequestMapping("/owner-comments")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('OWNER')")
 public class OwnerCommentController {
 
 	private final OwnerReviewService ownerReviewService;

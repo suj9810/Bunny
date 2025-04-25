@@ -23,4 +23,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	);
 
 	Optional<Review> findById(Long reviewId);
+
+	@EntityGraph(attributePaths = {"reviewImages"})
+	@Query("SELECT r FROM Review r JOIN FETCH r.reviewImages WHERE r.id = :id")
+	Optional<Review> findByIdWithReviewImages(@Param("id") Long reviewId);
 }
