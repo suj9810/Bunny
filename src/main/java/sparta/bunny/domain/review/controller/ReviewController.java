@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.common.response.CommonResponses;
+import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
 import sparta.bunny.domain.review.dto.request.ReviewCreateRequest;
 import sparta.bunny.domain.review.dto.request.ReviewDeleteRequestDto;
 import sparta.bunny.domain.review.dto.response.ReviewCreateResponse;
@@ -44,11 +46,11 @@ public class ReviewController {
 	 * @throws IOException
 	 */
 	@PostMapping
-	public ResponseEntity<?> createReviewWithImages(
+	public ResponseEntity<CommonResponse<ReviewCreateResponse>> createReviewWithImages(
 		@ModelAttribute ReviewCreateRequest dto,
-		@RequestParam("id") Long id
+		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) throws IOException {
-		CommonResponse<ReviewCreateResponse> response = reviewService.saveReview(dto, id);
+		CommonResponse<ReviewCreateResponse> response = reviewService.saveReview(dto, userDetails);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
@@ -67,10 +69,12 @@ public class ReviewController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity<CommonResponse<String>> deleteReview(
-		@RequestBody ReviewDeleteRequestDto dto
+	public ResponseEntity<String> deleteReview(
+		@RequestBody ReviewDeleteRequestDto dto,
+		@AuthenticationPrincipal UserDetailsImpl userDetails
+
 	) {
-		reviewService.deleteReviewsById(dto);
-		return null;
+		reviewService.deleteReviewsById(dto, userDetails);
+		return ResponseEntity.status(HttpStatus.OK).body("리뷰 삭제에 성공하였습니다.");
 	}
 }

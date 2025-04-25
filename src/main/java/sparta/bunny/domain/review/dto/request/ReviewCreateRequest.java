@@ -22,5 +22,7 @@ public class ReviewCreateRequest {
 	// @NotBlank
 	private Integer rating;
 
+	private Long orderId;
+
 	private List<MultipartFile> files;
 }

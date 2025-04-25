@@ -15,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.S3.S3Uploader;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.common.response.CommonResponses;
+import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
+import sparta.bunny.domain.order.entity.Order;
+import sparta.bunny.domain.order.repository.OrderRepository;
 import sparta.bunny.domain.review.code.ReviewExceptionCode;
 import sparta.bunny.domain.review.code.ReviewSuccessCode;
 import sparta.bunny.domain.review.dto.request.ReviewCreateRequest;
@@ -28,21 +31,50 @@ import sparta.bunny.domain.review.exception.ReviewException;
 import sparta.bunny.domain.review.repository.ImageRepository;
 import sparta.bunny.domain.review.repository.OwnerCommentRepository;
 import sparta.bunny.domain.review.repository.ReviewRepository;
+import sparta.bunny.domain.user.code.UserErrorCode;
+import sparta.bunny.domain.user.entity.User;
+import sparta.bunny.domain.user.exception.UserException;
+import sparta.bunny.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
 
+	// 최대 파일 크기 5MB
 	private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+	// 레포지토리
 	private final ReviewRepository reviewRepository;
 	private final OwnerCommentRepository ownerCommentRepository;
+	private final UserRepository userRepository;
+	private final OrderRepository orderRepository;
+
+	// S3
 	private final S3Uploader s3Uploader;
 	private final ImageRepository imageRepository;
 
 	@Transactional
-	public CommonResponse<ReviewCreateResponse> saveReview(ReviewCreateRequest request, Long id) throws IOException {
+	public CommonResponse<ReviewCreateResponse> saveReview(ReviewCreateRequest request,
+		UserDetailsImpl userDetails) throws
+		IOException {
 
-		Review review = Review.builder().content(request.getContent()).rating(request.getRating()).build();
+		User user = userRepository.findById(userDetails.getUser().getId())
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+		Order order = orderRepository.findById(request.getOrderId())
+			.orElseThrow(() -> new RuntimeException("주문 정보가 일치하지 않습니다.")); // Todo - Order Exception 사용하기
+
+		if (!userDetails.getUser().getId().equals(order.getUser().getId())) {
+			throw new ReviewException(ReviewExceptionCode.NOT_OWNER_OF_ORDER);
+		}
+
+		Review review = Review.builder()
+			.content(request.getContent())
+			.rating(request.getRating())
+			.user(user)
+			.order(order)
+			.store(order.getStore())
+			.build();
 
 		Review saved = reviewRepository.save(review);
 
@@ -64,6 +96,7 @@ public class ReviewService {
 
 	public CommonResponses<ReviewFindResponse> getReviewsByStoreId(Long storeId, Pageable pageable, Integer minRating,
 		Integer maxRating) {
+
 		Page<Review> page = reviewRepository.findByStoreIdAndRatingBetween(storeId, minRating, maxRating, pageable);
 
 		List<Review> reviews = page.getContent();
@@ -83,10 +116,14 @@ public class ReviewService {
 		return CommonResponses.of(ReviewSuccessCode.REVIEW_FOUND_SUCCESS, responsePage);
 	}
 
-	public CommonResponse<String> deleteReviewsById(ReviewDeleteRequestDto dto) {
+	public void deleteReviewsById(ReviewDeleteRequestDto dto, UserDetailsImpl userDetails) {
 
 		Review review = reviewRepository.findById(dto.getReviewId())
 			.orElseThrow(() -> new ReviewException(ReviewExceptionCode.REVIEW_NOT_FOUND));
+
+		if (!userDetails.getUser().getId().equals(review.getUser().getId())) {
+			throw new ReviewException(ReviewExceptionCode.NOT_OWNER_OF_REVIEW);
+		}
 
 		ownerCommentRepository.findByReviewId(dto.getReviewId()).ifPresent(ownerCommentRepository::delete);
 
@@ -99,7 +136,6 @@ public class ReviewService {
 		imageRepository.deleteAll(images); // DB에서 삭제
 
 		reviewRepository.delete(review);
-		return null;
 	}
 
 	// 파일 확장자, 크기 검사
