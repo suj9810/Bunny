@@ -10,13 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.S3.S3Uploader;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.common.response.CommonResponses;
+import sparta.bunny.common.service.FileService;
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
 import sparta.bunny.domain.order.entity.Order;
 import sparta.bunny.domain.order.repository.OrderRepository;
@@ -30,10 +30,9 @@ import sparta.bunny.domain.review.entity.OwnerComment;
 import sparta.bunny.domain.review.entity.Review;
 import sparta.bunny.domain.review.entity.ReviewImage;
 import sparta.bunny.domain.review.exception.ReviewException;
-import sparta.bunny.domain.review.repository.ImageRepository;
 import sparta.bunny.domain.review.repository.OwnerCommentRepository;
+import sparta.bunny.domain.review.repository.ReviewImageRepository;
 import sparta.bunny.domain.review.repository.ReviewRepository;
-import sparta.bunny.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -43,12 +42,13 @@ public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
 	private final OwnerCommentRepository ownerCommentRepository;
-	private final UserRepository userRepository;
 	private final OrderRepository orderRepository;
 
 	// S3
 	private final S3Uploader s3Uploader;
-	private final ImageRepository imageRepository;
+	private final ReviewImageRepository reviewImageRepository;
+
+	private final FileService fileService;
 
 	@Transactional
 	public CommonResponse<ReviewCreateResponse> saveReview(
@@ -72,17 +72,16 @@ public class ReviewService {
 
 		Review saved = reviewRepository.save(review);
 
-		// Todo - 서비스 분리
-		if (request.getFiles() != null && !request.getFiles().isEmpty()) {
-			for (MultipartFile file : request.getFiles()) {
-				validateImageExtension(file);
-				String url = s3Uploader.upload(file, "images");
+		List<ReviewImage> reviewImages = fileService.uploadAndCreateEntities(
+			request.getFiles(),
+			"review-images",
+			url -> ReviewImage.builder()
+				.imgUrl(url)
+				.review(saved)
+				.build()
+		);
 
-				ReviewImage reviewImage = ReviewImage.builder().imgUrl(url).review(saved).build();
-
-				imageRepository.save(reviewImage);
-			}
-		}
+		reviewImageRepository.saveAll(reviewImages);
 
 		ReviewCreateResponse createdReview = ReviewCreateResponse.builder().reviewId(saved.getId()).build();
 
@@ -122,32 +121,9 @@ public class ReviewService {
 
 		ownerCommentRepository.findByReviewId(dto.getReviewId()).ifPresent(ownerCommentRepository::delete);
 
-		List<ReviewImage> reviewImages = imageRepository.findAllByReviewId(dto.getReviewId());
-		for (ReviewImage reviewImage : reviewImages) {
-			String imageUrl = reviewImage.getImgUrl();
-			s3Uploader.delete(imageUrl); // S3에서 삭제
-		}
+		List<ReviewImage> reviewImages = reviewImageRepository.findAllByReviewId(dto.getReviewId());
+		fileService.deleteS3Images(reviewImages, ReviewImage::getImgUrl);
 
 		reviewRepository.delete(review);
 	}
-
-	/**
-	 * 파일 확장자, 크기 검사
-	 * @param file
-	 */
-	private void validateImageExtension(MultipartFile file) {
-		String originalFilename = file.getOriginalFilename();
-
-		// 파일 크기 검사
-		if (file.getSize() > MAX_FILE_SIZE) {
-			throw new IllegalArgumentException("파일 크기가 너무 큽니다. 최대 5MB까지 업로드할 수 있습니다.");
-		}
-
-		// 파일 확장자 검사
-		if (originalFilename == null || !(originalFilename.endsWith(".jpg") || originalFilename.endsWith(".jpeg")
-			|| originalFilename.endsWith(".png"))) {
-			throw new IllegalArgumentException("허용되지 않은 파일 확장자입니다.");
-		}
-	}
-
 }
