@@ -72,7 +72,38 @@ public class MenuService {
 		return CommonResponse.of(MenuSuccessCode.MENU_CREATE_SUCCESS, response);
 	}
 
-	public CommonResponse<MenuResponse> updateMenu(MenuUpdateRequest request) {
-		return null;
+	@Transactional
+	public CommonResponse<MenuResponse> updateMenu(Long menuId, MenuUpdateRequest request) {
+		Menu menu = menuRepository.findById(menuId)
+			.orElseThrow(() -> new MenuException(MenuExceptionCode.UNAUTHORIZED));
+
+		menu.updateMenu(request);
+
+		MenuResponse response = toResponse(menu);
+
+		return CommonResponse.of(MenuSuccessCode.MENU_SUCCESS, response);
+	}
+
+	@Transactional
+	public CommonResponse<MenuResponse> deleteMenu(Long menuId) {
+		Menu menu = menuRepository.findById(menuId)
+			.orElseThrow(() -> new MenuException(MenuExceptionCode.UNAUTHORIZED));
+
+		MenuResponse response = toResponse(menu);
+		return CommonResponse.of(MenuSuccessCode.MENU_SUCCESS, response);
+	}
+
+	private static MenuResponse toResponse(Menu menu) {
+		return MenuResponse.builder()
+			.menuId(menu.getId())
+			.description(menu.getDescription())
+			.name(menu.getName())
+			.price(menu.getPrice())
+			.imageUrl(menu.getImageUrl())
+			.status(menu.getStatus().name())
+			.options(menu.getOptions().stream()
+				.map(MenuOptionResponse::of)
+				.toList())
+			.build();
 	}
 }

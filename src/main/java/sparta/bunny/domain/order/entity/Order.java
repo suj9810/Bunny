@@ -50,4 +50,18 @@ public class Order extends BaseEntity {
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	private List<OrderMenu> orderMenus = new ArrayList<>();
 
+	public Order(User user, Store store) {
+		this.user = user;
+		this.store = store;
+	}
+
+	public void addMenu(OrderMenu menu) {
+		this.orderMenus.add(menu);
+		menu.setOrder(this); // FK 설정!
+	}
+
+	public void updateOrderStatus(OrderStatus orderStatus){
+		this.orderStatus = orderStatus;
+	}
+
 }

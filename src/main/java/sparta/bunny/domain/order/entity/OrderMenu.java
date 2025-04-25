@@ -11,18 +11,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
 import sparta.bunny.domain.menu.entity.Menu;
+import lombok.Setter;
+import sparta.bunny.domain.menu.entity.Menu;
 
 @Getter
 @Entity
 @Table(name = "orderMenus")
 @NoArgsConstructor
-public class OrderMenu extends BaseEntity {
+public class OrderMenu {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	// 주문
+	@Setter
 	@ManyToOne
 	@JoinColumn(name = "order_id")
 	private Order order;
@@ -36,4 +39,9 @@ public class OrderMenu extends BaseEntity {
 
 	private int totalPrice;
 
+	public OrderMenu(Menu menus, int totalPrice, int orderCnt) {
+		this.menus = menus;
+		this.totalPrice = totalPrice;
+		this.orderCnt = orderCnt;
+	}
 }

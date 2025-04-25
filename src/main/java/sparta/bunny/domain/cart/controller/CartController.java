@@ -9,7 +9,7 @@ import sparta.bunny.domain.cart.service.CartService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/cart")
+@RequestMapping("/carts")
 public class CartController {
 
     private final CartService cartService;
