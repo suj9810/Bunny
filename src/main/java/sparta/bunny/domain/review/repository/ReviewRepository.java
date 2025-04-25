@@ -12,7 +12,7 @@ import sparta.bunny.domain.review.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-	@Query("SELECT r FROM Review r " + "LEFT JOIN FETCH r.images " + "WHERE r.store.id = :storeId "
+	@Query("SELECT r FROM Review r " + "LEFT JOIN FETCH r.reviewImages " + "WHERE r.store.id = :storeId "
 		+ "AND r.rating BETWEEN :min AND :max")
 	Page<Review> findByStoreIdAndRatingBetween(@Param("storeId") Long storeId, @Param("min") Integer min,
 		@Param("max") Integer max, Pageable pageable);
