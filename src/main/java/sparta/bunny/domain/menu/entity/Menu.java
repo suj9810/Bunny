@@ -22,6 +22,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
+import sparta.bunny.domain.menu.dto.request.MenuOptionRequest;
+import sparta.bunny.domain.menu.dto.request.MenuUpdateRequest;
 import sparta.bunny.domain.menu.enums.Status;
 import sparta.bunny.domain.stores.entity.Store;
 
@@ -60,4 +62,21 @@ public class Menu extends BaseEntity {
 	@OneToMany(mappedBy = "menus", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<MenuOption> options = new ArrayList<>();
+
+	public void updateMenu(MenuUpdateRequest request) {
+		this.name = request.getName();
+		this.description = request.getDescription();
+		this.price = request.getPrice();
+		this.imageUrl = request.getImageUrl();
+
+		this.options.clear();
+		for (MenuOptionRequest optionRequest : request.getOptions()) {
+			MenuOption option = MenuOption.builder()
+				.name(optionRequest.getName())
+				.price(optionRequest.getPrice())
+				.menus(this)
+				.build();
+			this.options.add(option);
+		}
+	}
 }
