@@ -24,6 +24,11 @@ public class OwnerCommentController {
 
 	private final OwnerReviewService ownerReviewService;
 
+	/**
+	 * 사장 리뷰 응답 생성
+	 * @param request 생성할 리뷰 id, 내용
+	 * @return 생성한 응답
+	 */
 	@PostMapping
 	public ResponseEntity<CommonResponse<OwnerCommentCreateResponse>> saveOwnerComment(
 		@RequestBody OwnerCommentCreateRequestDto request,
@@ -34,6 +39,11 @@ public class OwnerCommentController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(ownerCommentCreateResponseCommonResponse);
 	}
 
+	/**
+	 * 사장 리뷰 응답 삭제
+	 * @param dto 삭제할 응답 id
+	 * @return 삭제 성공 여부
+	 */
 	@DeleteMapping
 	public ResponseEntity<String> deleteOwnerComment(
 		@RequestBody OwnerCommentDeleteRequestDto dto,

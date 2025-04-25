@@ -3,6 +3,8 @@ package sparta.bunny.domain.review.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,9 +26,9 @@ import sparta.bunny.domain.review.dto.request.ReviewCreateRequest;
 import sparta.bunny.domain.review.dto.request.ReviewDeleteRequestDto;
 import sparta.bunny.domain.review.dto.response.ReviewCreateResponse;
 import sparta.bunny.domain.review.dto.response.ReviewFindResponse;
-import sparta.bunny.domain.review.entity.Image;
 import sparta.bunny.domain.review.entity.OwnerComment;
 import sparta.bunny.domain.review.entity.Review;
+import sparta.bunny.domain.review.entity.ReviewImage;
 import sparta.bunny.domain.review.exception.ReviewException;
 import sparta.bunny.domain.review.repository.ImageRepository;
 import sparta.bunny.domain.review.repository.OwnerCommentRepository;
@@ -40,10 +42,8 @@ import sparta.bunny.domain.user.repository.UserRepository;
 @RequiredArgsConstructor
 public class ReviewService {
 
-	// 최대 파일 크기 5MB
 	private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-	// 레포지토리
 	private final ReviewRepository reviewRepository;
 	private final OwnerCommentRepository ownerCommentRepository;
 	private final UserRepository userRepository;
@@ -83,9 +83,9 @@ public class ReviewService {
 				validateImageExtension(file);
 				String url = s3Uploader.upload(file, "images");
 
-				Image image = Image.builder().imgUrl(url).review(saved).build();
+				ReviewImage reviewImage = ReviewImage.builder().imgUrl(url).review(saved).build();
 
-				imageRepository.save(image);
+				imageRepository.save(reviewImage);
 			}
 		}
 
@@ -101,17 +101,21 @@ public class ReviewService {
 
 		List<Review> reviews = page.getContent();
 
+		List<Long> reviewIds = reviews.stream()
+			.map(Review::getId)
+			.toList();
+
+		List<OwnerComment> ownerComments = ownerCommentRepository.findAllByReviewIdIn(reviewIds);
+		Map<Long, OwnerComment> commentMap = ownerComments.stream()
+			.collect(Collectors.toMap(c -> c.getReview().getId(), c -> c));
+
 		List<ReviewFindResponse> responses = new ArrayList<>();
 		for (Review review : reviews) {
-			OwnerComment ownerComment = ownerCommentRepository.findByReviewId(review.getId()).orElse(null);
-			responses.add(ReviewFindResponse.from(review, ownerComment, review.getImages()));
+			OwnerComment ownerComment = commentMap.get(review.getId());
+			responses.add(ReviewFindResponse.from(review, ownerComment, review.getReviewImages()));
 		}
 
 		Page<ReviewFindResponse> responsePage = new PageImpl<>(responses, pageable, page.getTotalElements());
-
-		for (ReviewFindResponse reviewFindResponse : responsePage) {
-			System.out.println("reviewFindResponse = " + reviewFindResponse.getImageUrls());
-		}
 
 		return CommonResponses.of(ReviewSuccessCode.REVIEW_FOUND_SUCCESS, responsePage);
 	}
@@ -127,18 +131,21 @@ public class ReviewService {
 
 		ownerCommentRepository.findByReviewId(dto.getReviewId()).ifPresent(ownerCommentRepository::delete);
 
-		List<Image> images = imageRepository.findAllByReviewId(dto.getReviewId());
-		for (Image image : images) {
-			String imageUrl = image.getImgUrl();
+		List<ReviewImage> reviewImages = imageRepository.findAllByReviewId(dto.getReviewId());
+		for (ReviewImage reviewImage : reviewImages) {
+			String imageUrl = reviewImage.getImgUrl();
 			s3Uploader.delete(imageUrl); // S3에서 삭제
 		}
 
-		imageRepository.deleteAll(images); // DB에서 삭제
+		imageRepository.deleteAll(reviewImages); // DB에서 삭제
 
 		reviewRepository.delete(review);
 	}
 
-	// 파일 확장자, 크기 검사
+	/**
+	 * 파일 확장자, 크기 검사
+	 * @param file
+	 */
 	private void validateImageExtension(MultipartFile file) {
 		String originalFilename = file.getOriginalFilename();
 

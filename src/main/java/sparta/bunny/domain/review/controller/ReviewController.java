@@ -54,6 +54,15 @@ public class ReviewController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
+	/**
+	 * 리뷰 조회
+	 * @param storeId 상점 id
+	 * @param minRating 최소 별점
+	 * @param maxRating 최대 별점
+	 * @param page 현재 페이지
+	 * @param size 사이즈
+	 * @return 조회된 리뷰
+	 */
 	@GetMapping
 	public ResponseEntity<CommonResponses<ReviewFindResponse>> findReviewByStoreId(
 		@RequestParam(value = "storeId") Long storeId,
@@ -68,6 +77,11 @@ public class ReviewController {
 		return ResponseEntity.status(HttpStatus.OK).body(reviews);
 	}
 
+	/**
+	 * 리뷰 삭제
+	 * @param dto 삭제할 리뷰 id
+	 * @return 삭제 성공 여부
+	 */
 	@DeleteMapping
 	public ResponseEntity<String> deleteReview(
 		@RequestBody ReviewDeleteRequestDto dto,
