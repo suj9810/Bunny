@@ -114,14 +114,14 @@ public class ReviewService {
 
 	public void deleteReviewsById(ReviewDeleteRequestDto dto, UserDetailsImpl userDetails) {
 
-		Review review = reviewRepository.findById(dto.getReviewId())
+		Review review = reviewRepository.findByIdWithReviewImages(dto.getReviewId())
 			.orElseThrow(() -> new ReviewException(ReviewExceptionCode.REVIEW_NOT_FOUND));
 
 		review.validateOwner(userDetails.getUser());
 
 		ownerCommentRepository.findByReviewId(dto.getReviewId()).ifPresent(ownerCommentRepository::delete);
 
-		List<ReviewImage> reviewImages = reviewImageRepository.findAllByReviewId(dto.getReviewId());
+		List<ReviewImage> reviewImages = review.getReviewImages();
 		fileService.deleteS3Images(reviewImages, ReviewImage::getImgUrl);
 
 		reviewRepository.delete(review);
