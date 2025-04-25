@@ -6,7 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.domain.user.CustomPasswordEncoder;
 import sparta.bunny.domain.user.code.UserErrorCode;
+import sparta.bunny.domain.user.dto.request.UserPasswordUpdateRequestDto;
 import sparta.bunny.domain.user.dto.request.UserSignUpRequestDto;
+import sparta.bunny.domain.user.dto.request.UserUpdateRequestDto;
 import sparta.bunny.domain.user.dto.response.UserResponseDto;
 import sparta.bunny.domain.user.entity.User;
 import sparta.bunny.domain.user.exception.UserException;
@@ -89,5 +91,30 @@ public class UserService {
 			.userNum(user.getUserNumber())
 			.nickName(user.getNickname())
 			.build();
+	}
+
+	@Transactional
+	public UserUpdateRequestDto updateUserInfo(User user, UserUpdateRequestDto requestDto) {
+		user.updateUserInfo(requestDto.getNickname(), requestDto.getUserNumber());
+
+		return requestDto;
+	}
+
+	@Transactional
+	public void updatePassword(User user, UserPasswordUpdateRequestDto requestDto) {
+
+		// 현재 비밀번호 != 입력한 비밀번호
+		if (!passwordEncoder.matches(requestDto.getOldPassword(), user.getPassword())) {
+			throw new UserException(UserErrorCode.PASSWORD_MISMATCH);
+		}
+
+		// 현재 비밀번호 == 새 비밀번호
+		if (passwordEncoder.matches(requestDto.getNewPassword(), user.getPassword())) {
+			throw new UserException(UserErrorCode.SAME_AS_PASSWORD);
+		}
+
+		// 새 비밀번호 암호화
+		String encodedNewPassword = passwordEncoder.encode(requestDto.getNewPassword());
+		user.updatePassword(encodedNewPassword);
 	}
 }

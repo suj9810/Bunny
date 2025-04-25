@@ -12,10 +12,11 @@ public enum UserErrorCode implements ResponseCode {
 	//400 BAD_REQUEST
 	INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "비밀번호 형식이 올바르지 않습니다.", "INVALID_PASSWORD_FORMAT"),
 	PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다.", "PASSWORD_MISMATCH"),
-	SOCIAL_TYPE_MISMATCH(HttpStatus.BAD_REQUEST, "소셜 로그인 타입이 일치하지 않습니다.", "SOCIAL_TYPE_MISMATCH"),
+	// SOCIAL_TYPE_MISMATCH(HttpStatus.BAD_REQUEST, "소셜 로그인 타입이 일치하지 않습니다.", "SOCIAL_TYPE_MISMATCH"),
 
 	// 401 UNAUTHORIZED
 	LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.", "LOGIN_FAILED"),
+	SAME_AS_PASSWORD(HttpStatus.UNAUTHORIZED, "기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다", "SAME_AS_PASSWORD"),
 
 	// 403 FORBIDDEN
 	UNAUTHORIZED_ROLE(HttpStatus.FORBIDDEN, "해당 작업을 수행할 권한이 없습니다.", "UNAUTHORIZED_USER"),

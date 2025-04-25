@@ -17,7 +17,8 @@ public enum UserResponseCode implements ResponseCode {
 	LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃 성공", "LOGOUT_SUCCESS"),
 	UPDATE_USER_SUCCESS(HttpStatus.OK, "회원 정보 수정 완료", "UPDATE_USER_SUCCESS"),
 	FIND_USER_SUCCESS(HttpStatus.OK, "회원 조회 성공", "FIND_USER_SUCCESS"),
-	WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 완료", "WITHDRAW_SUCCESS");
+	WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴 완료", "WITHDRAW_SUCCESS"),
+	UPDATE_PASSWORD_SUCCESS(HttpStatus.OK, "비밀번호 수정 완료", "UPDATE_PASSWORD_SUCCESS");
 
 	private final HttpStatus httpStatus;
 	private final String message;
