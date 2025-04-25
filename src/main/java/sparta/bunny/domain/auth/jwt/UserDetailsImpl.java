@@ -19,6 +19,10 @@ public class UserDetailsImpl implements UserDetails {
 		this.user = user;
 	}
 
+	public User getUser() {
+		return user;
+	}
+
 	// @Override
 	// public Collection<? extends GrantedAuthority> getAuthorities() {
 	// 	// USER/OWNER 권한을 문자열로 변경

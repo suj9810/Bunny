@@ -29,7 +29,7 @@ public class AuthSecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				// 등록 경로 : 인증 없이 접근 허용
 				// 접근 허용하고 싶으면 경로 추가 💡
-				.requestMatchers("/users/signup", "/auth/login").permitAll()
+				.requestMatchers("/users/signup", "/auth/login", "/users/{id}").permitAll()
 				// 그이 경로 : 반드시 인증 진행
 				.anyRequest().authenticated()
 			)
