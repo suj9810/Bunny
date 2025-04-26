@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import sparta.bunny.domain.order.dto.OrderResponseDto;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +37,39 @@ public class LogAop {
 
 	@Pointcut("execution(* sparta.bunny.domain..*Controller.*(..)))")
 	private void loggingPointcut() {
+	}
+
+	// 주문 할 때, 주문 상태 변경 할때
+	@Pointcut("execution(* sparta.bunny.domain.order.service.OrderService.createOrder(..))")
+	public void orderCreatePointCut() {
+
+	}
+
+	@Pointcut("execution(* sparta.bunny.domain.order.service.OrderService.changeOrderStatus(..))")
+	public void orderChangeStatusPointCut() {
+
+	}
+
+	@AfterReturning(pointcut = "orderCreatePointCut()", returning = "response")
+	public void logAfterOrderCreateRequest(Object response) {
+		logAfterOrder(response);
+	}
+
+	@AfterReturning(pointcut = "orderChangeStatusPointCut()", returning = "response")
+	public void logAfterOrderUpdateStatus(Object response) {
+		logAfterOrder(response);
+	}
+
+	private void logAfterOrder(Object response) {
+		if (response instanceof OrderResponseDto dto) {
+			log.info("주문 처리 시각: {}, 주문 ID: {}, 가게 ID: {}, 주문 상태: {}",
+				LocalDateTime.now(),
+				dto.getOrderId(),
+				dto.getStoreId(),
+				dto.getOrderStatus());
+		} else {
+			log.warn("주문 응답 객체 형식이 잘못되었습니다.: {}", response.getClass().getSimpleName());
+		}
 	}
 
 	@Around("loggingPointcut()")

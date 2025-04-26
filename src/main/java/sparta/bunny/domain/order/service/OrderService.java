@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class OrderService {
 	private final MenuRepository menuRepository;
 	private final OrderRepository orderRepository;
 
+	@Transactional
 	public OrderResponseDto createOrder(Long userId) {
 		//cart 정보 가져오기
 		CartMenuResponseDto cart = cartService.getCart(userId);
@@ -61,6 +63,7 @@ public class OrderService {
 
 			OrderMenu orderMenu = new OrderMenu(menu, cartItem.getQuantity(), menu.getPrice());
 			order.addMenu(orderMenu); // 양방향 연결
+			user.addOrder(order);
 
 			itemDtos.add(new OrderMenuDto(
 				menu.getId(),
@@ -74,20 +77,39 @@ public class OrderService {
 
 		cartService.clearCart(userId);
 
-		return new OrderResponseDto(
-			order.getId(),
-			user.getId(),
-			store.getId(),
-			order.getOrderedAt(),
-			order.getOrderStatus().name(),
-			itemDtos
-		);
+		return OrderResponseDto.of(order, itemDtos);
 	}
 
-	public void changeOrderStatus(Long orderId, ChangeOrderStatusRequestDto requestDto) {
+	@Transactional(readOnly = true)
+	public List<OrderResponseDto> getOrderList(Long userId) {
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 유저 아이디 입니다."));
+
+		return user.getOrderList().stream()
+			.map(OrderResponseDto::fromOrder)
+			.toList();
+	}
+
+	@Transactional
+	public OrderResponseDto changeOrderStatus(Long orderId, ChangeOrderStatusRequestDto requestDto) {
 
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
 		order.updateOrderStatus(OrderStatus.of(requestDto.getOrderStatus()));
+
+		return OrderResponseDto.fromOrder(order);
+	}
+
+	public OrderResponseDto getOrder(Long userId, Long orderId) {
+
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
+
+		if (!userId.equals(order.getUser().getId())) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "잘못된 접근입니다.");
+		}
+
+		return OrderResponseDto.fromOrder(order);
 	}
 }

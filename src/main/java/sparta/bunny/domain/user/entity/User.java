@@ -1,5 +1,9 @@
 package sparta.bunny.domain.user.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -7,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -14,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
+import sparta.bunny.domain.order.entity.Order;
 
 @Entity
 @Table(name = "users")
@@ -52,6 +58,9 @@ public class User extends BaseEntity {
 	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted = false;
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<Order> orderList = new ArrayList<>();
+
 	@Builder
 	public User(String userEmail, String userPassword, String nickname, UserRole userRole, String userNumber,
 		Boolean isDeleted) {
@@ -70,5 +79,10 @@ public class User extends BaseEntity {
 
 	public void updatePassword(String password) {
 		this.password = password;
+	}
+
+	public void addOrder(Order order) {
+		this.orderList.add(order);
+		order.setUser(this); // FK 설정!
 	}
 }

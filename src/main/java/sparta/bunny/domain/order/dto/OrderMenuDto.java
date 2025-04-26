@@ -6,8 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class OrderMenuDto {
-    private Long menuId;
-    private String menuName;
-    private int quantity;
-    private int price;
+	private Long menuId;
+	private String menuName;
+	private int quantity;
+	private int price;
+
 }
