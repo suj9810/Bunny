@@ -1,26 +1,30 @@
 package sparta.bunny.domain.stores.repository;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import sparta.bunny.domain.stores.entity.Store;
 
-import java.util.List;
-import java.util.Optional;
+import sparta.bunny.domain.stores.entity.Store;
+import sparta.bunny.domain.user.entity.User;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    //단일 가게 조회 (폐업한 가게는 빼고)
-    Optional<Store> findByIdAndIsClosedFalse(Long id);
+	// 모든 가게 조회(사장님이여서 폐업 상관없이 자기 가게 전체 조회)
+	Page<Store> findAllByUser(User user, Pageable pageable);
 
-    // 전체 가게 조회(폐업한 가게는 빼고)
-    List<Store> findAllByIsClosedFalse();
+	// 카테고리별로 전체 가게 조회(사장님이여서 폐업 상관없이 자기 가게 전체 조회)
+	Page<Store> findAllByUserAndCategoryName(User user, String categoryName, Pageable pageable);
 
-    // 카테고리별 가게 조회(폐업한 가게는 빼고)
-    List<Store> findAllByCategoryNameAndIsClosedFalse(String categoryName);
+	// keyword 가 들어간 가게 이름 찾기
+	@EntityGraph(attributePaths = {"menus"})
+	List<Store> findByStoreNameContaining(String keyword);
 
-    Optional<Store> findById(Long Id);
+	// 카테고리별로 전체 가게 조회 단 폐업한 가게는 제외(사용자 부분에서 사용)
+	Page<Store> findAllByCategoryNameAndIsClosedFalse(String categoryName, Pageable pageable);
 
-    // keyword 가 들어간 가게 이름 찾기
-    @EntityGraph(attributePaths = {"menus"})
-    List<Store> findByStoreNameContaining(String keyword);
+	// 폐업하지 않은 모든 가게 조회(사용자 부분에서 사용)
+	Page<Store> findAllByIsClosedFalse(Pageable pageable);
 }

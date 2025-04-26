@@ -1,4 +1,4 @@
-package sparta.bunny.domain.stores.dto;
+package sparta.bunny.domain.stores.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
