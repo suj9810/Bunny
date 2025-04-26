@@ -1,13 +1,13 @@
 package sparta.bunny.domain.order.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChangeOrderStatusRequestDto {
 
-    private final String orderStatus;
-
-    public ChangeOrderStatusRequestDto(String orderStatus) {
-        this.orderStatus = orderStatus;
-    }
+	private String orderStatus;
 }

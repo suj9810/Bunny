@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import sparta.bunny.domain.menu.enums.Status;
 
 @Getter
 @Setter
@@ -27,6 +28,8 @@ public class MenuUpdateRequest {
 	@NotNull(message = "가격은 필수입니다.")
 	@Min(value = 0, message = "가격은 0 이상이어야 합니다.")
 	private Integer price;
+
+	private Status status;
 
 	private List<MultipartFile> files;
 
