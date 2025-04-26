@@ -91,16 +91,7 @@ public class OrderService {
 			.toList();
 	}
 
-	@Transactional
-	public OrderResponseDto changeOrderStatus(Long orderId, ChangeOrderStatusRequestDto requestDto) {
-
-		Order order = orderRepository.findById(orderId)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
-		order.updateOrderStatus(OrderStatus.of(requestDto.getOrderStatus()));
-
-		return OrderResponseDto.fromOrder(order);
-	}
-
+	@Transactional(readOnly = true)
 	public OrderResponseDto getOrder(Long userId, Long orderId) {
 
 		Order order = orderRepository.findById(orderId)
@@ -112,4 +103,15 @@ public class OrderService {
 
 		return OrderResponseDto.fromOrder(order);
 	}
+
+	@Transactional
+	public OrderResponseDto changeOrderStatus(Long orderId, ChangeOrderStatusRequestDto requestDto) {
+
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
+		order.updateOrderStatus(OrderStatus.of(requestDto.getOrderStatus()));
+
+		return OrderResponseDto.fromOrder(order);
+	}
+
 }
