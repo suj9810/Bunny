@@ -67,6 +67,7 @@ public class Menu extends BaseEntity {
 		this.name = request.getName();
 		this.description = request.getDescription();
 		this.price = request.getPrice();
+		this.status = request.getStatus();
 		this.options.clear();
 		for (MenuOptionRequest optionRequest : request.getOptions()) {
 			MenuOption option = MenuOption.builder()

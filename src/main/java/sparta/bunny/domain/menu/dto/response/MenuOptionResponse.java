@@ -11,7 +11,6 @@ import sparta.bunny.domain.menu.entity.MenuOption;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuOptionResponse {
-
 	private String name;
 	private Integer price;
 

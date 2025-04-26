@@ -17,6 +17,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import sparta.bunny.common.audit.BaseEntity;
 import sparta.bunny.domain.order.enums.OrderStatus;
 import sparta.bunny.domain.stores.entity.Store;
@@ -33,6 +34,7 @@ public class Order extends BaseEntity {
 	private Long id;
 
 	// 유저 ManyToOne
+	@Setter
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
@@ -60,7 +62,7 @@ public class Order extends BaseEntity {
 		menu.setOrder(this); // FK 설정!
 	}
 
-	public void updateOrderStatus(OrderStatus orderStatus){
+	public void updateOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
 	}
 

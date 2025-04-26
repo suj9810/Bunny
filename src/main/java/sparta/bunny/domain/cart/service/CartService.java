@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import lombok.RequiredArgsConstructor;
+import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
 import sparta.bunny.domain.cart.dto.CartMenuRequestDto;
 import sparta.bunny.domain.cart.dto.CartMenuResponseDto;
 import sparta.bunny.domain.cart.entity.Cart;
@@ -29,14 +30,14 @@ public class CartService {
 
 	/**
 	 * 장바구니 메뉴 추가
-	 * @param userId 유저
+	 * @param userDetails 유저 정보
 	 * @param storeId 가게
 	 * @param requestDto 요청 데이터
 	 */
-	public void addToCart(Long userId, Long storeId, CartMenuRequestDto requestDto) {
+	public void addToCart(UserDetailsImpl userDetails, Long storeId, CartMenuRequestDto requestDto) {
 
 		// cart:userId 형태로 key 저장
-		String key = CART_KEY_PREFIX + userId;
+		String key = CART_KEY_PREFIX + userDetails.getUser().getId();
 
 		// Redis 에서 해당 유저의 장바구니(Cart)를 꺼냄
 		Cart cart = redisTemplate.opsForValue().get(key);
