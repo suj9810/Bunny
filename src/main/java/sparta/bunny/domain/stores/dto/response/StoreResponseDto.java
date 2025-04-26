@@ -1,4 +1,4 @@
-package sparta.bunny.domain.stores.dto;
+package sparta.bunny.domain.stores.dto.response;
 
 import java.time.LocalTime;
 

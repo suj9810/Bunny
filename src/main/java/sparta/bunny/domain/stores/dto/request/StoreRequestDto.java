@@ -1,4 +1,4 @@
-package sparta.bunny.domain.stores.dto;
+package sparta.bunny.domain.stores.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +30,8 @@ public class StoreRequestDto {
 
 	// 가게 등록 요청
 	@Builder
-	public StoreRequestDto(String storeName, String openTime, String closeTime, Integer minOrderPrice, String notice, String categoryName) {
+	public StoreRequestDto(String storeName, String openTime, String closeTime, Integer minOrderPrice, String notice,
+		String categoryName) {
 		this.storeName = storeName;
 		this.openTime = openTime;
 		this.closeTime = closeTime;
