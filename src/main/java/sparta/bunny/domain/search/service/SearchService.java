@@ -11,7 +11,9 @@ import sparta.bunny.domain.search.dto.response.SearchResponseDto;
 import sparta.bunny.domain.search.entity.SearchLog;
 import sparta.bunny.domain.search.repository.SearchLogRepository;
 import sparta.bunny.domain.stores.repository.StoreRepository;
+import sparta.bunny.domain.user.code.UserErrorCode;
 import sparta.bunny.domain.user.entity.User;
+import sparta.bunny.domain.user.exception.UserException;
 import sparta.bunny.domain.user.repository.UserRepository;
 
 import java.util.ArrayList;
@@ -58,7 +60,7 @@ public class SearchService {
     public List<SearchHistoriesDto> getHistories(Long userId) {
 
         // 이메일로 로그인한 유저 바인딩
-        User currentUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+        User currentUser = userRepository.findById(userId).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         // 최근 검색 기록 10개를 찾아서 리스트로 변환 후 반환.
         return searchLogRepository.findTop10ByUserOrderBySearchedAtDesc(currentUser).stream()
@@ -81,6 +83,16 @@ public class SearchService {
         }
 
         return list;
+    }
+
+    // 내 검색 기록 삭제
+    public void deleteHistories(User user) {
+
+        if(user == null) {
+            throw new UserException(UserErrorCode.USER_NOT_FOUND);
+        }
+
+        searchLogRepository.deleteAllByUser(user);
     }
 
 }

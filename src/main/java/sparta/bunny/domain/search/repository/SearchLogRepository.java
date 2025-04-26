@@ -26,4 +26,7 @@ public interface SearchLogRepository extends JpaRepository<SearchLog, Long> {
     """)
     List<String> findTop10PopularKeywords(Pageable pageable);
 
+    // 검색 기록 모두 삭제
+    void deleteAllByUser(User user);
+
 }
