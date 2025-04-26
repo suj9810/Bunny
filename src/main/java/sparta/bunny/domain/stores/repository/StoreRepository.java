@@ -1,5 +1,6 @@
 package sparta.bunny.domain.stores.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import sparta.bunny.domain.stores.entity.Store;
 
@@ -18,4 +19,8 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     List<Store> findAllByCategoryNameAndIsClosedFalse(String categoryName);
 
     Optional<Store> findById(Long Id);
+
+    // keyword 가 들어간 가게 이름 찾기
+    @EntityGraph(attributePaths = {"menus"})
+    List<Store> findByStoreNameContaining(String keyword);
 }

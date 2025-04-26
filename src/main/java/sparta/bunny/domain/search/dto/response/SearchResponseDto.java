@@ -16,7 +16,7 @@ public class SearchResponseDto {
 	// 가게 정보
 	private final Long storeId;
 	private final String storeName;
-	private final Integer minOrderPlace;
+	private final Integer minOrderPrice;
 	private final LocalTime openTime;
 	private final LocalTime closeTime;
 	private final boolean isClosed;
@@ -27,7 +27,7 @@ public class SearchResponseDto {
 	public SearchResponseDto(Store store, List<MenuSummaryResponseDto> menus) {
 		this.storeId = store.getId();
 		this.storeName = store.getStoreName();
-		this.minOrderPlace = store.getMinOrderPrice();
+		this.minOrderPrice = store.getMinOrderPrice();
 		this.openTime = store.getOpenTime();
 		this.closeTime = store.getCloseTime();
 		this.isClosed = store.getIsClosed();
