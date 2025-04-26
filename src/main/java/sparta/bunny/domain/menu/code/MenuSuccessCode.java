@@ -13,7 +13,10 @@ public enum MenuSuccessCode implements ResponseCode {
 	MENU_CREATE_SUCCESS(true, HttpStatus.CREATED, "메뉴 생성 성공", "MENU_CREATE_SUCCESS"),
 	// MENU_FOUND_SUCCESS(true, HttpStatus.OK, "리뷰 조회 성공", "REVIEW_FOUND_SUCCESS"),
 	// ✅ 200 OK
-	MENU_SUCCESS(true, HttpStatus.CREATED, "메뉴 응답 성공", "MENU_SUCCESS");
+	MENU_SUCCESS(true, HttpStatus.OK, "메뉴 응답 성공", "MENU_SUCCESS"),
+	// ✅ 204 NO_CONTENT
+	MENU_NO_CONTENT(true, HttpStatus.NO_CONTENT, "메뉴 응답 성공", "MENU_NO_CONTENT"),
+	;
 
 	private final boolean success;
 	private final HttpStatus httpStatus;
