@@ -19,7 +19,9 @@ public enum MenuExceptionCode implements ResponseCode {
 	NOT_OWNER_OF_STORE(false, HttpStatus.FORBIDDEN, "본인의 가게가 아닙니다.", "NOT_OWNER_OF_STORE"),
 
 	// 404 NOT_FOUND
-	NOT_FOUND_STORE(false, HttpStatus.NOT_FOUND, "스토어가 없습니다.", "NOT_FOUND_STORE");
+	NOT_FOUND_STORE(false, HttpStatus.NOT_FOUND, "스토어가 없습니다.", "NOT_FOUND_STORE"),
+	NOT_FOUND_MENU(false, HttpStatus.NOT_FOUND, "메뉴가 없습니다.", "NOT_FOUND_MENU"),
+	;
 
 	private final boolean success;
 	private final HttpStatus httpStatus;

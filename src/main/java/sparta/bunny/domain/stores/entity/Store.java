@@ -1,18 +1,14 @@
 package sparta.bunny.domain.stores.entity;
 
 import java.time.LocalTime;
+import java.util.List;
 
+import jakarta.persistence.*;
 import lombok.Builder;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sparta.bunny.domain.menu.entity.Menu;
 import sparta.bunny.domain.user.entity.User;
 
 @Getter
@@ -42,6 +38,10 @@ public class Store {
     private Boolean isClosed;
 
     private String categoryName;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "store_id")
+    private List<Menu> menus;
 
     // 가게 등록
     @Builder

@@ -12,7 +12,6 @@ import lombok.Getter;
 
 @Getter
 @Builder
-// @NoArgsConstructor
 @AllArgsConstructor
 public class MenuResponse {
 

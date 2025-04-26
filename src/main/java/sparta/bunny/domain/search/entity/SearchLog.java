@@ -21,7 +21,7 @@ public class SearchLog {
     private Long id; // PK
 
     @ManyToOne
-    @JoinColumn(nullable = false, name = "user_id")
+    @JoinColumn(nullable = true, name = "user_id")
     private User user; // 유저 FK
 
     @Column(nullable = false)
@@ -36,5 +36,8 @@ public class SearchLog {
         this.searchedAt = LocalDateTime.now();
     }
 
-
+    public SearchLog(User user, String keyword) {
+        this.user = user;
+        this.keyword = keyword;
+    }
 }
