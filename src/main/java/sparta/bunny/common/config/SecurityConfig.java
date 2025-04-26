@@ -26,7 +26,7 @@ public class SecurityConfig {
 	private final UserRepository userRepository;
 
 	private static final String[] AUTH_WHITELIST = {
-		"/users/signup", "/auth/login", "/users/{id}"
+		"/users/signup", "/auth/login", "/users/{id}", "/searches", "/searches/trending"
 	};
 
 	@Bean
