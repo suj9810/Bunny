@@ -1,5 +1,6 @@
 package sparta.bunny.domain.menu.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -7,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.response.CommonResponse;
+import sparta.bunny.common.service.FileService;
+import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
 import sparta.bunny.domain.menu.code.MenuExceptionCode;
 import sparta.bunny.domain.menu.code.MenuSuccessCode;
 import sparta.bunny.domain.menu.dto.request.MenuCreateRequest;
@@ -15,10 +18,11 @@ import sparta.bunny.domain.menu.dto.response.MenuOptionResponse;
 import sparta.bunny.domain.menu.dto.response.MenuResponse;
 import sparta.bunny.domain.menu.dto.response.StoreInfoResponse;
 import sparta.bunny.domain.menu.entity.Menu;
+import sparta.bunny.domain.menu.entity.MenuImage;
 import sparta.bunny.domain.menu.entity.MenuOption;
 import sparta.bunny.domain.menu.enums.Status;
 import sparta.bunny.domain.menu.exception.MenuException;
-import sparta.bunny.domain.menu.repository.MenuOptionRepository;
+import sparta.bunny.domain.menu.repository.MenuImageRepository;
 import sparta.bunny.domain.menu.repository.MenuRepository;
 import sparta.bunny.domain.stores.entity.Store;
 import sparta.bunny.domain.stores.repository.StoreRepository;
@@ -28,21 +32,23 @@ import sparta.bunny.domain.stores.repository.StoreRepository;
 public class MenuService {
 
 	private final MenuRepository menuRepository;
-	private final MenuOptionRepository menuOptionRepository;
 	private final StoreRepository storeRepository;
+	private final MenuImageRepository menuImageRepository;
+	private final FileService fileService;
 
 	@Transactional
-	public CommonResponse<MenuResponse> saveMenu(MenuCreateRequest request) {
+	public CommonResponse<MenuResponse> saveMenu(MenuCreateRequest request, Long loginUserId) throws IOException {
 
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new MenuException(MenuExceptionCode.NOT_FOUND_STORE));
+
+		validOwner(store.getUser().getId(), loginUserId);
 
 		Menu menu = Menu.builder()
 			.store(store)
 			.description(request.getDescription())
 			.name(request.getName())
 			.price(request.getPrice())
-			.imageUrl(request.getImageUrl())
 			.status(Status.ACTIVE)
 			.build();
 
@@ -50,60 +56,89 @@ public class MenuService {
 			.map(optionRequest -> MenuOption.builder()
 				.name(optionRequest.getName())
 				.price(optionRequest.getPrice())
-				.menus(menu)
+				.menu(menu)
 				.build())
 			.toList();
 
 		menu.getOptions().addAll(options);
-		menuRepository.save(menu);
+		Menu save = menuRepository.save(menu);
 
+		List<MenuImage> menuImages = fileService.uploadAndCreateEntities(
+			request.getFiles(),
+			"menu-images",
+			url -> MenuImage.builder()
+				.imgUrl(url)
+				.menu(save)
+				.build()
+		);
+
+		menuImageRepository.saveAll(menuImages);
+		
 		MenuResponse response = MenuResponse.builder()
 			.menuId(menu.getId())
 			.description(menu.getDescription())
 			.name(menu.getName())
 			.price(menu.getPrice())
-			.imageUrl(menu.getImageUrl())
 			.status(menu.getStatus().name())
 			.store(StoreInfoResponse.of(menu.getStore()))
-			.options(menu.getOptions().stream().map(MenuOptionResponse::of)
-				.toList()
-			)
+			.imageUrl(menuImages.get(0).getImgUrl())
+			.options(menu.getOptions().stream().map(MenuOptionResponse::of).toList())
 			.build();
+
 		return CommonResponse.of(MenuSuccessCode.MENU_CREATE_SUCCESS, response);
 	}
 
 	@Transactional
-	public CommonResponse<MenuResponse> updateMenu(Long menuId, MenuUpdateRequest request) {
-		Menu menu = menuRepository.findById(menuId)
-			.orElseThrow(() -> new MenuException(MenuExceptionCode.UNAUTHORIZED));
+	public CommonResponse<MenuResponse> updateMenu(Long menuId, UserDetailsImpl userDetails,
+		MenuUpdateRequest request) throws IOException {
+
+		Menu menu = findMenu(menuId, userDetails.getUser().getId());
+
+		List<MenuImage> menuImages = fileService.uploadAndCreateEntities(
+			request.getFiles(),
+			"menu-images",
+			url -> MenuImage.builder()
+				.imgUrl(url)
+				.menu(menu)
+				.build()
+		);
 
 		menu.updateMenu(request);
-
-		MenuResponse response = toResponse(menu);
+		MenuResponse response = MenuResponse.builder()
+			.menuId(menu.getId())
+			.description(menu.getDescription())
+			.name(menu.getName())
+			.price(menu.getPrice())
+			.status(menu.getStatus().name())
+			.imageUrl(menuImages.get(0).getImgUrl())
+			.store(StoreInfoResponse.of(menu.getStore()))
+			.options(menu.getOptions().stream().map(MenuOptionResponse::of).toList())
+			.build();
 
 		return CommonResponse.of(MenuSuccessCode.MENU_SUCCESS, response);
 	}
 
 	@Transactional
-	public CommonResponse<MenuResponse> deleteMenu(Long menuId) {
-		Menu menu = menuRepository.findById(menuId)
-			.orElseThrow(() -> new MenuException(MenuExceptionCode.UNAUTHORIZED));
+	public CommonResponse<MenuResponse> deleteMenu(Long menuId, UserDetailsImpl userDetails) {
 
-		MenuResponse response = toResponse(menu);
-		return CommonResponse.of(MenuSuccessCode.MENU_SUCCESS, response);
+		Menu menu = findMenu(menuId, userDetails.getUser().getId());
+
+		menu.changeStatus(Status.DELETED);
+		return CommonResponse.of(MenuSuccessCode.MENU_NO_CONTENT, null);
 	}
 
-	private static MenuResponse toResponse(Menu menu) {
-		return MenuResponse.builder()
-			.menuId(menu.getId())
-			.description(menu.getDescription())
-			.name(menu.getName())
-			.price(menu.getPrice())
-			.imageUrl(menu.getImageUrl())
-			.status(menu.getStatus().name())
-			.options(menu.getOptions().stream()
-				.map(MenuOptionResponse::of)
-				.toList())
-			.build();
+	private Menu findMenu(Long menuId, Long loginUserId) {
+		Menu menu = menuRepository.findById(menuId)
+			.orElseThrow(() -> new MenuException(MenuExceptionCode.NOT_FOUND_MENU));
+
+		validOwner(menu.getStore().getUser().getId(), loginUserId);
+
+		return menu;
+	}
+
+	private void validOwner(Long ownerId, Long loginUserId) {
+		if (!ownerId.equals(loginUserId)) {
+			throw new MenuException(MenuExceptionCode.NOT_OWNER_OF_STORE);
+		}
 	}
 }

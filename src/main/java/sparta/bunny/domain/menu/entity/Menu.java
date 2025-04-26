@@ -52,31 +52,33 @@ public class Menu extends BaseEntity {
 	@Column(nullable = false)
 	private Integer price;
 
-	@Column(length = 1024)
-	private String imageUrl;
-
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Status status = Status.ACTIVE;
 
-	@OneToMany(mappedBy = "menus", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<MenuOption> options = new ArrayList<>();
+
+	@OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<MenuImage> images = new ArrayList<>();
 
 	public void updateMenu(MenuUpdateRequest request) {
 		this.name = request.getName();
 		this.description = request.getDescription();
 		this.price = request.getPrice();
-		this.imageUrl = request.getImageUrl();
-
 		this.options.clear();
 		for (MenuOptionRequest optionRequest : request.getOptions()) {
 			MenuOption option = MenuOption.builder()
 				.name(optionRequest.getName())
 				.price(optionRequest.getPrice())
-				.menus(this)
+				.menu(this)
 				.build();
 			this.options.add(option);
 		}
+	}
+
+	public void changeStatus(Status status) {
+		this.status = status;
 	}
 }

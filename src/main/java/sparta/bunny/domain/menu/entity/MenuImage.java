@@ -1,6 +1,5 @@
 package sparta.bunny.domain.menu.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -9,31 +8,29 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import sparta.bunny.common.audit.BaseEntity;
 
 @Entity
-@Table(name = "menu_option")
 @Getter
+@Table(name = "menu_images")
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class MenuOption extends BaseEntity {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Data
+public class MenuImage {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private String imgUrl;
+
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "menu_id", nullable = false)
+	@JoinColumn(name = "menu_id")
 	private Menu menu;
-
-	@Column(nullable = false)
-	private String name;
-
-	@Column(nullable = false)
-	private Integer price = 0;
-
 }
