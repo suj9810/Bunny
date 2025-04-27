@@ -62,7 +62,7 @@ public class User extends BaseEntity {
 	private List<Order> orderList = new ArrayList<>();
 
 	@Builder
-	public User(String userEmail, String userPassword, String nickname, UserRole userRole, String userNumber,
+	public User(String email, String password, String nickname, UserRole userRole, String userNumber,
 		Boolean isDeleted) {
 		this.email = email;
 		this.password = password;
@@ -84,5 +84,9 @@ public class User extends BaseEntity {
 	public void addOrder(Order order) {
 		this.orderList.add(order);
 		order.setUser(this); // FK 설정!
+	}
+
+	public void softDelete() {
+		this.isDeleted = true;
 	}
 }
