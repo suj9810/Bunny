@@ -5,17 +5,19 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
+import sparta.bunny.domain.cart.code.CartExceptionCode;
 import sparta.bunny.domain.cart.dto.CartMenuRequestDto;
 import sparta.bunny.domain.cart.dto.CartMenuResponseDto;
 import sparta.bunny.domain.cart.entity.Cart;
 import sparta.bunny.domain.cart.entity.CartMenu;
+import sparta.bunny.domain.cart.exception.CartException;
+import sparta.bunny.domain.menu.code.MenuExceptionCode;
 import sparta.bunny.domain.menu.entity.Menu;
+import sparta.bunny.domain.menu.exception.MenuException;
 import sparta.bunny.domain.menu.repository.MenuRepository;
 
 @Service
@@ -58,7 +60,7 @@ public class CartService {
 			existing.get().setQuantity(existing.get().getQuantity() + requestDto.getQuantity());
 		} else {
 			Menu menu = menuRepository.findById(requestDto.getMenuId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 메뉴 입니다."));
+				.orElseThrow(() -> new MenuException(MenuExceptionCode.NOT_FOUND_MENU));
 			CartMenu cartMenu = new CartMenu(menu.getId(), menu.getName(), menu.getPrice(), requestDto.getQuantity());
 			cart.getMenus().add(cartMenu);
 		}
@@ -102,7 +104,7 @@ public class CartService {
 		Cart cart = redisTemplate.opsForValue().get(key);
 
 		if (cart == null) {
-			return; // 장바구니가 없으면 그냥 아무것도 안 함
+			throw new CartException(CartExceptionCode.CART_EMPTY); // 장바구니가 없으면 그냥 아무것도 안 함
 		}
 
 		List<CartMenu> items = cart.getMenus();
