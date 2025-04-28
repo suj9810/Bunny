@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.common.response.CommonResponses;
 import sparta.bunny.common.service.FileService;
@@ -34,6 +35,7 @@ import sparta.bunny.domain.review.repository.OwnerCommentRepository;
 import sparta.bunny.domain.review.repository.ReviewImageRepository;
 import sparta.bunny.domain.review.repository.ReviewRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -70,16 +72,22 @@ public class ReviewService {
 		Review saved = reviewRepository.save(review);
 
 		// 이미지 업로드
-		List<ReviewImage> reviewImages = fileService.uploadAndCreateEntities(
-			request.getFiles(),
-			"review-images",
-			url -> ReviewImage.builder()
-				.imgUrl(url)
-				.review(saved)
-				.build()
-		);
+		if (request.getFiles() != null) {
+			try {
+				List<ReviewImage> reviewImages = fileService.uploadAndCreateEntities(
+					request.getFiles(),
+					"review-images",
+					url -> ReviewImage.builder()
+						.imgUrl(url)
+						.review(saved)
+						.build()
+				);
 
-		reviewImageRepository.saveAll(reviewImages);
+				reviewImageRepository.saveAll(reviewImages);
+			} catch (Exception e) {
+				log.warn("리뷰 이미지 업로드 실패. reviewId = {}, 이유 = {}", saved.getId(), e.getMessage());
+			}
+		}
 
 		ReviewCreateResponse createdReview = ReviewCreateResponse.builder().reviewId(saved.getId()).build();
 
