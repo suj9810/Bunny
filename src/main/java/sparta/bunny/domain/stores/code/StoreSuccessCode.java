@@ -16,7 +16,6 @@ public enum StoreSuccessCode implements ResponseCode {
 	STORE_REOPEN_SUCCESS(true, HttpStatus.OK, "가게 재오픈 완료", "STORE_REOPEN_SUCCESS"),
 	STORE_FETCH_SUCCESS(true, HttpStatus.OK, "가게 조회 완료", "STORE_FETCH_SUCCESS"),
 	STORE_FETCH_ALL_SUCCESS(true, HttpStatus.OK, "전체 가게 조회 완료", "STORE_FETCH_ALL_SUCCESS"),
-	STORE_FAVORITE_SUCCESS(true, HttpStatus.OK, "즐겨찾기 완료", "STORE_FAVORITE_SUCCESS"),
 	STORE_CLOSE_CANCELLATION_SUCCESS(true, HttpStatus.OK, "가게 폐업 해제 완료",
 		"STORE_CLOSE_CANCELLATION_SUCCESS"); // 폐업 해제 추가
 

@@ -27,4 +27,8 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
 	// 폐업하지 않은 모든 가게 조회(사용자 부분에서 사용)
 	Page<Store> findAllByIsClosedFalse(Pageable pageable);
+
+	//가게 수
+	long countByUser(User user);
+
 }

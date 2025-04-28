@@ -1,13 +1,11 @@
 package sparta.bunny.domain.stores.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.response.CommonResponse;
+import sparta.bunny.common.response.CommonResponses;
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
 import sparta.bunny.domain.stores.code.StoreSuccessCode;
 import sparta.bunny.domain.stores.dto.request.StoreRequestDto;
@@ -29,11 +28,11 @@ import sparta.bunny.domain.stores.dto.request.StoreStatusDto;
 import sparta.bunny.domain.stores.dto.response.StoreResponseDto;
 import sparta.bunny.domain.stores.dto.response.StoreWithMenuResponseDto;
 import sparta.bunny.domain.stores.service.OwnerStoreService;
-import sparta.bunny.domain.user.entity.User;
 
 @RestController
 @RequestMapping("/owner/store")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('OWNER')")
 public class OwnerStoreController {
 
 	private final OwnerStoreService ownerStoreService;
@@ -75,7 +74,7 @@ public class OwnerStoreController {
 	 * @return 가게 목록과 페이지 정보
 	 */
 	@GetMapping
-	public ResponseEntity<CommonResponse<Map<String, Object>>> getAllStores(
+	public ResponseEntity<CommonResponses<StoreResponseDto>> getAllStores(
 		@RequestParam(required = false) String categories,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
@@ -85,27 +84,20 @@ public class OwnerStoreController {
 		Page<StoreResponseDto> storeList = ownerStoreService.getStoresByCategory(userDetails.getUser(), categories,
 			pageable);
 
-		Map<String, Object> data = new HashMap<>();
-		data.put("totalElements", storeList.getTotalElements()); // 총 갯수
-		data.put("totalPages", storeList.getTotalPages()); // 총 페이지 갯수
-		data.put("hasNextPage", storeList.hasNext());  // 다음 페이지 여부
-		data.put("hasPreviousPage", storeList.hasPrevious());  // 이전 페이지 여부
-		data.put("content", storeList.getContent());
-
-		return ResponseEntity.ok(CommonResponse.of(StoreSuccessCode.STORE_FETCH_ALL_SUCCESS, data));
+		return ResponseEntity.ok(CommonResponses.of(StoreSuccessCode.STORE_FETCH_ALL_SUCCESS, storeList));
 	}
 
 	/**
 	 * 단일 가게 조회 (메뉴 포함)
 	 * @param storeId 조회할 가게 Id
-	 * @param user 인증된 사용자 정보
 	 * @return 가게 정보 및 메뉴 목록
 	 */
-	@GetMapping("/owner/stores/{storeId}")
-	public ResponseEntity<StoreWithMenuResponseDto> getStoreWithMenus(
+	@GetMapping("/{storeId}")
+	public ResponseEntity<CommonResponse<StoreWithMenuResponseDto>> getStoreWithMenus(
 		@PathVariable Long storeId,
-		@AuthenticationPrincipal User user) {
-		return ResponseEntity.ok(ownerStoreService.getStoreWithMenus(storeId, user));
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		StoreWithMenuResponseDto responseDto = ownerStoreService.getStoreWithMenus(storeId, userDetails.getUser());
+		return ResponseEntity.ok(CommonResponse.of(StoreSuccessCode.STORE_FETCH_SUCCESS, responseDto));
 	}
 
 	/**

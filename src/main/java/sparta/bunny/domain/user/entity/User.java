@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
 import sparta.bunny.domain.order.entity.Order;
+import sparta.bunny.domain.stores.entity.Store;
 
 @Entity
 @Table(name = "users")
@@ -63,6 +64,9 @@ public class User extends BaseEntity {
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Order> orderList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Store> stores;
 
 	@Builder
 	public User(String email, String password, String nickname, UserRole userRole, String userNumber,

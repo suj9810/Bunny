@@ -60,7 +60,7 @@ public class Menu extends BaseEntity {
 	@Builder.Default
 	private Status status = Status.ACTIVE;
 
-	@OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@Builder.Default
 	private List<MenuOption> options = new ArrayList<>();
 

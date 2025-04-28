@@ -1,13 +1,11 @@
 package sparta.bunny.domain.stores.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,16 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.response.CommonResponse;
+import sparta.bunny.common.response.CommonResponses;
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
 import sparta.bunny.domain.stores.code.StoreSuccessCode;
 import sparta.bunny.domain.stores.dto.response.StoreResponseDto;
 import sparta.bunny.domain.stores.dto.response.StoreWithMenuResponseDto;
 import sparta.bunny.domain.stores.service.UserStoreService;
-import sparta.bunny.domain.user.entity.User;
 
 @RestController
 @RequestMapping("/user/store")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('USER')")
 public class UserStoreController {
 
 	private final UserStoreService userStoreService;
@@ -40,25 +39,17 @@ public class UserStoreController {
 	 * @return 가게 목록
 	 */
 	@GetMapping
-	public ResponseEntity<CommonResponse<Map<String, Object>>> getStores(
+	public ResponseEntity<CommonResponses<StoreResponseDto>> getStores(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@RequestParam(required = false) String categories,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
-		User user = userDetails.getUser();
 		Pageable pageable = PageRequest.of(page, size);
 
-		Page<StoreResponseDto> storeList = userStoreService.getStores(user, categories, pageable);
+		Page<StoreResponseDto> storeList = userStoreService.getStores(categories, pageable);
 
-		Map<String, Object> data = new HashMap<>();
-		data.put("totalElements", storeList.getTotalElements());
-		data.put("totalPages", storeList.getTotalPages());
-		data.put("hasNextPage", storeList.hasNext());
-		data.put("hasPreviousPage", storeList.hasPrevious());
-		data.put("content", storeList.getContent());
-
-		return ResponseEntity.ok(CommonResponse.of(StoreSuccessCode.STORE_FETCH_ALL_SUCCESS, data));
+		return ResponseEntity.ok(CommonResponses.of(StoreSuccessCode.STORE_FETCH_ALL_SUCCESS, storeList));
 	}
 
 	/**
@@ -72,8 +63,8 @@ public class UserStoreController {
 		@PathVariable Long storeId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
-		User user = userDetails.getUser();
-		StoreWithMenuResponseDto storeWithMenus = userStoreService.getStoreWithMenus(storeId, user);
+		StoreWithMenuResponseDto storeWithMenus = userStoreService.getStoreWithMenus(storeId);
+
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(CommonResponse.of(StoreSuccessCode.STORE_FETCH_SUCCESS, storeWithMenus));
 	}

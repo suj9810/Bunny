@@ -20,10 +20,7 @@ import sparta.bunny.domain.stores.dto.response.StoreWithMenuResponseDto;
 import sparta.bunny.domain.stores.entity.Store;
 import sparta.bunny.domain.stores.exception.StoreException;
 import sparta.bunny.domain.stores.repository.StoreRepository;
-import sparta.bunny.domain.user.code.UserErrorCode;
 import sparta.bunny.domain.user.entity.User;
-import sparta.bunny.domain.user.entity.UserRole;
-import sparta.bunny.domain.user.exception.UserException;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +32,15 @@ public class OwnerStoreService {
 	// 가게 등록
 	@Transactional
 	public void createStore(StoreRequestDto requestDto, User user) {
-		if (user.getUserRole() != UserRole.OWNER) { // 사용자가 owner인지 확인
-			throw new UserException(UserErrorCode.UNAUTHORIZED_ROLE); // owner가 아닐경우엔 UNAUTHORIZED_ROLE 예외 발생
+
+		// 사용자가 등록한 가게 개수 확인
+		long userStoreCount = storeRepository.countByUser(user);
+
+		// 가게 개수가 3개 이상이면 예외 처리
+		if (userStoreCount >= 3) {
+			throw new StoreException(StoreExceptionCode.STORE_LIMIT_EXCEEDED); // 예외 코드 추가
 		}
+
 		Store store = Store.builder()
 			.user(user)
 			.storeName(requestDto.getStoreName())
@@ -84,11 +87,10 @@ public class OwnerStoreService {
 
 		if (closure) { // closure = true면 폐업 처리
 			store.close();
-			storeRepository.save(store);
 		} else { // closure = false면 폐업 해제
 			store.reopen();
-			storeRepository.save(store);
 		}
+		storeRepository.save(store);
 	}
 
 	// 전체 가게 조회 (카테고리가 있으면 카테고리별로 전체 조회 없으면 가게 전체 조회)
@@ -119,27 +121,34 @@ public class OwnerStoreService {
 		Store store = storeRepository.findById(storeId) // storeId로 가게 조회
 			.orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND)); // 가게가 없으면 STORE_NOT_FOUND 예외 발생
 
-		// 권한 확인 (사장 본인의 가게인지)
+		// 사장 본인의 가게인지 확인
 		if (!store.getUser().getId().equals(user.getId())) {
 			throw new StoreException(
 				StoreExceptionCode.UNAUTHORIZED_ACCESS); // 본인 가게인지 확인 본인 가게가 아니면 UNAUTHORIZED_ACCESS 예외 발생
 		}
 
-		List<Menu> menus = menuRepository.findAllByStoreId(storeId); // 해당 가게에 저장된 매뉴 조회
+		List<Menu> menus = menuRepository.findMenusWithOptionsAndImagesByStoreId(storeId); // 해당 가게에 저장된 매뉴 조회
 
 		List<MenuResponse> menuResponses = menus.stream()
-			.map(menu -> MenuResponse.builder()
-				.menuId(menu.getId())
-				.name(menu.getName())
-				.description(menu.getDescription())
-				.price(menu.getPrice())
-				.imageUrl(menu.getImages().isEmpty() ? null : menu.getImages().get(0).getImgUrl())
-				.status(menu.getStatus().name())
-				.store(null)
-				.options(menu.getOptions().stream()
+			.map(menu -> {
+				List<MenuOptionResponse> options = menu.getOptions().stream()
 					.map(MenuOptionResponse::of)
-					.collect(Collectors.toList()))
-				.build())
+					.collect(Collectors.toList());
+
+				// 메뉴 이미지 URL, 이미지가 여러개 있을 시 첫 번째 이미지로 가져옴
+				String imageUrl = menu.getImages().isEmpty() ? null : menu.getImages().get(0).getImgUrl();
+
+				return MenuResponse.builder()
+					.menuId(menu.getId())
+					.name(menu.getName())
+					.description(menu.getDescription())
+					.price(menu.getPrice())
+					.status(menu.getStatus().name())
+					.imageUrl(imageUrl)
+					.store(null)
+					.options(options)
+					.build();
+			})
 			.collect(Collectors.toList());
 
 		return StoreWithMenuResponseDto.builder()
@@ -154,5 +163,4 @@ public class OwnerStoreService {
 			.menu(menuResponses)
 			.build();
 	}
-
 }
