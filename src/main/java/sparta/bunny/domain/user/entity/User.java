@@ -3,6 +3,8 @@ package sparta.bunny.domain.user.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.Where;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +29,7 @@ import sparta.bunny.domain.order.entity.Order;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Where(clause = "is_deleted = false")
 public class User extends BaseEntity {
 
 	@Id
@@ -62,7 +65,7 @@ public class User extends BaseEntity {
 	private List<Order> orderList = new ArrayList<>();
 
 	@Builder
-	public User(String userEmail, String userPassword, String nickname, UserRole userRole, String userNumber,
+	public User(String email, String password, String nickname, UserRole userRole, String userNumber,
 		Boolean isDeleted) {
 		this.email = email;
 		this.password = password;
@@ -84,5 +87,9 @@ public class User extends BaseEntity {
 	public void addOrder(Order order) {
 		this.orderList.add(order);
 		order.setUser(this); // FK 설정!
+	}
+
+	public void softDelete() {
+		this.isDeleted = true;
 	}
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import sparta.bunny.common.response.CommonResponse;
@@ -47,7 +48,7 @@ public class ReviewController {
 	 */
 	@PostMapping
 	public ResponseEntity<CommonResponse<ReviewCreateResponse>> createReviewWithImages(
-		@ModelAttribute ReviewCreateRequest dto,
+		@Valid @ModelAttribute ReviewCreateRequest dto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) throws IOException {
 		CommonResponse<ReviewCreateResponse> response = reviewService.saveReview(dto, userDetails);
@@ -84,7 +85,7 @@ public class ReviewController {
 	 */
 	@DeleteMapping
 	public ResponseEntity<String> deleteReview(
-		@RequestBody ReviewDeleteRequestDto dto,
+		@Valid @RequestBody ReviewDeleteRequestDto dto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 
 	) {

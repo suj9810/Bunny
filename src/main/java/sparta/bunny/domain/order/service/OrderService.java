@@ -1,5 +1,6 @@
 package sparta.bunny.domain.order.service;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,8 +37,10 @@ public class OrderService {
 	private final MenuRepository menuRepository;
 	private final OrderRepository orderRepository;
 
+	@SuppressWarnings({"checkstyle:WhitespaceAround", "checkstyle:RegexpSingleline"})
 	@Transactional
 	public OrderResponseDto createOrder(Long userId) {
+
 		//cart 정보 가져오기
 		CartMenuResponseDto cart = cartService.getCart(userId);
 
@@ -52,16 +55,26 @@ public class OrderService {
 		Store store = storeRepository.findById(cart.getStoreId())
 			.orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
 
+		LocalTime now = LocalTime.now();
+
+		//가게 오픈시간 전이거나 마감시간 지났을때
+		if (now.isBefore(store.getOpenTime()) || now.isAfter(store.getCloseTime())) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "주문 가능 시간이 아닙니다.");
+		}
+
 		//유저와 가게 정보로 주문 객체 만들기
 		Order order = new Order(user, store);
 
 		List<OrderMenuDto> itemDtos = new ArrayList<>();
+		int totalPrice = 0;
 
 		for (CartMenu cartItem : cart.getMenus()) {
 			Menu menu = menuRepository.findById(cartItem.getMenuId())
 				.orElseThrow(() -> new IllegalArgumentException("메뉴를 찾을 수 없습니다."));
 
-			OrderMenu orderMenu = new OrderMenu(menu, cartItem.getQuantity(), menu.getPrice());
+			totalPrice += menu.getPrice() * cartItem.getQuantity();
+
+			OrderMenu orderMenu = new OrderMenu(menu, cartItem.getQuantity());
 			order.addMenu(orderMenu); // 양방향 연결
 			user.addOrder(order);
 
@@ -71,6 +84,11 @@ public class OrderService {
 				cartItem.getQuantity(),
 				menu.getPrice()
 			));
+		}
+
+		// 최소 주문금액 미달일때
+		if (totalPrice < store.getMinOrderPrice()) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "최소 주문금액을 충족하지 못했습니다.");
 		}
 
 		orderRepository.save(order);
@@ -94,7 +112,7 @@ public class OrderService {
 	@Transactional(readOnly = true)
 	public OrderResponseDto getOrder(Long userId, Long orderId) {
 
-		Order order = orderRepository.findById(orderId)
+		Order order = orderRepository.findByIdWithOrderMenus(orderId)
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
 
 		if (!userId.equals(order.getUser().getId())) {

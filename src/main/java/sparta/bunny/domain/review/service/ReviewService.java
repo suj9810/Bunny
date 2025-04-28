@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.common.response.CommonResponses;
 import sparta.bunny.common.service.FileService;
@@ -33,6 +35,7 @@ import sparta.bunny.domain.review.repository.OwnerCommentRepository;
 import sparta.bunny.domain.review.repository.ReviewImageRepository;
 import sparta.bunny.domain.review.repository.ReviewRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -46,6 +49,7 @@ public class ReviewService {
 	private final FileService fileService;
 
 	@Transactional
+	@PreAuthorize("hasRole('USER')")
 	public CommonResponse<ReviewCreateResponse> saveReview(
 		ReviewCreateRequest request, UserDetailsImpl userDetails
 	) throws IOException {
@@ -68,16 +72,22 @@ public class ReviewService {
 		Review saved = reviewRepository.save(review);
 
 		// 이미지 업로드
-		List<ReviewImage> reviewImages = fileService.uploadAndCreateEntities(
-			request.getFiles(),
-			"review-images",
-			url -> ReviewImage.builder()
-				.imgUrl(url)
-				.review(saved)
-				.build()
-		);
+		if (request.getFiles() != null) {
+			try {
+				List<ReviewImage> reviewImages = fileService.uploadAndCreateEntities(
+					request.getFiles(),
+					"review-images",
+					url -> ReviewImage.builder()
+						.imgUrl(url)
+						.review(saved)
+						.build()
+				);
 
-		reviewImageRepository.saveAll(reviewImages);
+				reviewImageRepository.saveAll(reviewImages);
+			} catch (Exception e) {
+				log.warn("리뷰 이미지 업로드 실패. reviewId = {}, 이유 = {}", saved.getId(), e.getMessage());
+			}
+		}
 
 		ReviewCreateResponse createdReview = ReviewCreateResponse.builder().reviewId(saved.getId()).build();
 
@@ -108,6 +118,7 @@ public class ReviewService {
 		return CommonResponses.of(ReviewSuccessCode.REVIEW_FOUND_SUCCESS, responsePage);
 	}
 
+	@PreAuthorize("hasRole('USER')")
 	public void deleteReviewsById(ReviewDeleteRequestDto dto, UserDetailsImpl userDetails) {
 
 		Review review = reviewRepository.findByIdWithReviewImages(dto.getReviewId())

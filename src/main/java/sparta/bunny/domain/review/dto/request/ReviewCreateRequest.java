@@ -19,9 +19,10 @@ public class ReviewCreateRequest {
 	@NotBlank
 	private String content;
 
-	// @NotBlank
+	@NotBlank
 	private Integer rating;
 
+	@NotBlank
 	private Long orderId;
 
 	private List<MultipartFile> files;

@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import sparta.bunny.domain.menu.enums.Status;
 
+/**
+ *	메뉴 수정 요청
+ */
 @Getter
 @Setter
 @NoArgsConstructor
