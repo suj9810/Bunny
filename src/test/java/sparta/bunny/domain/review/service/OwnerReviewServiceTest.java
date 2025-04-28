@@ -23,6 +23,7 @@ import sparta.bunny.domain.review.entity.OwnerComment;
 import sparta.bunny.domain.review.entity.Review;
 import sparta.bunny.domain.review.repository.OwnerCommentRepository;
 import sparta.bunny.domain.review.repository.ReviewRepository;
+import sparta.bunny.domain.stores.entity.Category;
 import sparta.bunny.domain.stores.entity.Store;
 import sparta.bunny.domain.user.entity.User;
 import sparta.bunny.domain.user.entity.UserRole;
@@ -76,7 +77,7 @@ class OwnerReviewServiceTest {
 			.minOrderPrice(1)
 			.notice("공지")
 			.isClosed(false)
-			.categoryName("한식")
+			.categoryName(Category.분식)
 			.build();
 		ReflectionTestUtils.setField(store, "id", 1L);
 
