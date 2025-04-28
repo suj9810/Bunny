@@ -19,6 +19,10 @@ public class UserDetailsImpl implements UserDetails {
 		this.user = user;
 	}
 
+	public Long getId() {
+		return user.getId();
+	}
+
 	public User getUser() {
 		return user;
 	}

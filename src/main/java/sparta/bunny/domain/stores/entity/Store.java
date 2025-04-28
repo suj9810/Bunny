@@ -5,12 +5,14 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,7 +30,7 @@ public class Store {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
 
@@ -44,7 +46,8 @@ public class Store {
 
 	private Boolean isClosed; // 폐업 여부
 
-	private String categoryName; // 카테고리 (ex. 한식, 카페, 양식, 일식 등등)
+	@Enumerated(EnumType.STRING)
+	private Category categoryName; // 카테고리 (ex. 한식, 카페, 양식, 일식 등등)
 
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "store_id")
@@ -53,7 +56,7 @@ public class Store {
 	// 가게 등록
 	@Builder
 	public Store(User user, String storeName, String openTime, String closeTime, Integer minOrderPrice, String notice,
-		Boolean isClosed, String categoryName) {
+		Boolean isClosed, Category categoryName) {
 		this.user = user;
 		this.storeName = storeName;
 		this.openTime = LocalTime.parse(openTime);
@@ -66,7 +69,7 @@ public class Store {
 
 	// 가게 수정
 	public void updateStore(String storeName, String openTime, String closeTime, Integer minOrderPrice, String notice,
-		String categoryName) {
+		Category categoryName) {
 		this.storeName = storeName;
 		this.openTime = LocalTime.parse(openTime);
 		this.closeTime = LocalTime.parse(closeTime);

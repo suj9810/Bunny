@@ -3,6 +3,7 @@ package sparta.bunny.domain.stores.dto.response;
 import java.time.LocalTime;
 
 import lombok.Getter;
+import sparta.bunny.domain.stores.entity.Category;
 
 @Getter
 public class StoreResponseDto {
@@ -13,10 +14,10 @@ public class StoreResponseDto {
 	private final Integer minOrderPrice;
 	private final String notice;
 	private final Boolean isClosed;
-	private final String categoryName;
+	private final Category categoryName;
 
 	public StoreResponseDto(Long id, String storeName, LocalTime openTime, LocalTime closeTime, Integer minOrderPrice,
-		String notice, Boolean isClosed, String categoryName) {
+		String notice, Boolean isClosed, Category categoryName) {
 		this.id = id;
 		this.storeName = storeName;
 		this.openTime = openTime;

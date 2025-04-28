@@ -20,4 +20,8 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 	 * @return the list
 	 */
 	List<Menu> findAllByStoreId(Long storeId);
+
+	List<Menu> findMenusWithOptionsAndImagesByStoreId(Long storeId);
+
 }
+
