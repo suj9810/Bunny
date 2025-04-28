@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -47,17 +46,17 @@ public class CartController {
 	// 메뉴 1개 삭제
 	@DeleteMapping("/{menuId}")
 	public ResponseEntity<Void> removeMenu(
-		@RequestParam Long userId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long menuId
 	) {
-		cartService.removeMenu(userId, menuId);
+		cartService.removeMenu(userDetails.getUser().getId(), menuId);
 		return ResponseEntity.ok().build();
 	}
 
 	// 장바구니 전체 비우기
 	@DeleteMapping("/clear")
-	public ResponseEntity<Void> clearCart(@RequestParam Long userId) {
-		cartService.clearCart(userId);
+	public ResponseEntity<Void> clearCart(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		cartService.clearCart(userDetails.getUser().getId());
 		return ResponseEntity.ok().build();
 	}
 }
