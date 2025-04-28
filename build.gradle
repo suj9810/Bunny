@@ -47,7 +47,14 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+
+
+    // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // 버전 깨짐으로 추가
+    implementation 'io.lettuce:lettuce-core:6.2.6.RELEASE'
 }
 
 tasks.named('test') {

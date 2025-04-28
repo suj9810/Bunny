@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.domain.stores.entity.Store;
 
+/**
+ * 가게 정보 응답
+ */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

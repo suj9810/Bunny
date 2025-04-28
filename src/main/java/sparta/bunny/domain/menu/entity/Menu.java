@@ -27,6 +27,9 @@ import sparta.bunny.domain.menu.dto.request.MenuUpdateRequest;
 import sparta.bunny.domain.menu.enums.Status;
 import sparta.bunny.domain.stores.entity.Store;
 
+/**
+ * Menu Entity
+ */
 @Entity
 @Table(name = "menus")
 @Builder
@@ -54,6 +57,7 @@ public class Menu extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
+	@Builder.Default
 	private Status status = Status.ACTIVE;
 
 	@OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -61,8 +65,14 @@ public class Menu extends BaseEntity {
 	private List<MenuOption> options = new ArrayList<>();
 
 	@OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@Builder.Default
 	private List<MenuImage> images = new ArrayList<>();
 
+	/**
+	 * 메뉴 수정
+	 *
+	 * @param request the request
+	 */
 	public void updateMenu(MenuUpdateRequest request) {
 		this.name = request.getName();
 		this.description = request.getDescription();
@@ -79,6 +89,11 @@ public class Menu extends BaseEntity {
 		}
 	}
 
+	/**
+	 * 메뉴 상태 변경
+	 *
+	 * @param status the status
+	 */
 	public void changeStatus(Status status) {
 		this.status = status;
 	}

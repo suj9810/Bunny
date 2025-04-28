@@ -40,8 +40,8 @@ public class CartController {
 
 	// 장바구니 조회
 	@GetMapping
-	public ResponseEntity<CartMenuResponseDto> getCart(@RequestParam Long userId) {
-		return ResponseEntity.ok(cartService.getCart(userId));
+	public ResponseEntity<CartMenuResponseDto> getCart(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return ResponseEntity.ok(cartService.getCart(userDetails.getUser().getId()));
 	}
 
 	// 메뉴 1개 삭제

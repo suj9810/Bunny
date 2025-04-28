@@ -34,6 +34,7 @@ public class SearchController {
      * @param dto
      * @return 키워드가 포함된 가게 정보 및 해당 가게의 메뉴 이름들 리스트로 반환
      */
+
     @PostMapping
     public ResponseEntity<CommonResponse<List<SearchResponseDto>>> searchForUsers(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                                    @RequestBody @Valid SearchRequestDto dto) {
@@ -52,7 +53,7 @@ public class SearchController {
     public ResponseEntity<CommonResponse<List<PopularKeywordDto>>> getPopularKeywords() {
 
         List<PopularKeywordDto> result = searchService.getPopularKeywords();
-
+      
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.of(SearchSuccessCode.POPULAR_KEYWORDS_FETCH_SUCCESS, result));
     }
 

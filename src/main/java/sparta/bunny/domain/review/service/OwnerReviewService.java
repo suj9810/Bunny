@@ -1,5 +1,6 @@
 package sparta.bunny.domain.review.service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -21,6 +22,7 @@ import sparta.bunny.domain.review.repository.ReviewRepository;
 
 @Service
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('OWNER')")
 public class OwnerReviewService {
 
 	private final OwnerCommentRepository ownerCommentRepository;
@@ -29,10 +31,6 @@ public class OwnerReviewService {
 	@Transactional
 	public CommonResponse<OwnerCommentCreateResponse> saveOwnerComment(OwnerCommentCreateRequestDto request,
 		UserDetailsImpl userDetails) {
-
-		if (!userDetails.getAuthorities().equals("OWNER")) {
-			throw new OwnerCommentException(OwnerCommentExceptionCode.NOT_OWNER_OF_STORE);
-		}
 
 		Review review = reviewRepository.findById(request.getReviewId()).orElseThrow(() -> new ReviewException(
 			ReviewExceptionCode.REVIEW_NOT_FOUND));

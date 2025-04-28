@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
@@ -33,7 +34,7 @@ public class OwnerCommentController {
 	 */
 	@PostMapping
 	public ResponseEntity<CommonResponse<OwnerCommentCreateResponse>> saveOwnerComment(
-		@RequestBody OwnerCommentCreateRequestDto request,
+		@Valid @RequestBody OwnerCommentCreateRequestDto request,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		CommonResponse<OwnerCommentCreateResponse> ownerCommentCreateResponseCommonResponse = ownerReviewService.saveOwnerComment(
@@ -48,7 +49,7 @@ public class OwnerCommentController {
 	 */
 	@DeleteMapping
 	public ResponseEntity<String> deleteOwnerComment(
-		@RequestBody OwnerCommentDeleteRequestDto dto,
+		@Valid @RequestBody OwnerCommentDeleteRequestDto dto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		ownerReviewService.deleteOwnerComment(dto, userDetails);
