@@ -49,7 +49,6 @@ public class MenuService {
 	 */
 	@Transactional
 	public CommonResponse<MenuResponse> saveMenu(MenuCreateRequest request, Long loginUserId) throws IOException {
-
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new MenuException(MenuExceptionCode.NOT_FOUND_STORE));
 
@@ -73,21 +72,23 @@ public class MenuService {
 
 		menu.getOptions().addAll(options);
 		Menu save = menuRepository.save(menu);
+		List<MenuImage> menuImages = null;
+		if (request.getFiles() != null && !request.getFiles().isEmpty()) {
+			try {
+				menuImages = fileService.uploadAndCreateEntities(
+					request.getFiles(),
+					"menu-images",
+					url -> MenuImage.builder()
+						.imgUrl(url)
+						.menu(save)
+						.build()
+				);
+				menuImageRepository.saveAll(menuImages);
 
-		List<MenuImage> menuImages = fileService.uploadAndCreateEntities(
-			request.getFiles(),
-			"menu-images",
-			url -> MenuImage.builder()
-				.imgUrl(url)
-				.menu(save)
-				.build()
-		);
-
-		if (menuImages.isEmpty()) {
-			throw new MenuException(MenuExceptionCode.MENU_IMAGE_UPLOAD_FAILED);
+			} catch (Exception e) {
+				throw new MenuException(MenuExceptionCode.MENU_IMAGE_UPLOAD_FAILED);
+			}
 		}
-
-		menuImageRepository.saveAll(menuImages);
 
 		MenuResponse response = MenuResponse.builder()
 			.menuId(menu.getId())
@@ -115,23 +116,31 @@ public class MenuService {
 	@Transactional
 	public CommonResponse<MenuResponse> updateMenu(Long menuId, UserDetailsImpl userDetails,
 		MenuUpdateRequest request) throws IOException {
-
 		Menu menu = findMenu(menuId, userDetails.getUser().getId());
 
-		List<MenuImage> menuImages = fileService.uploadAndCreateEntities(
-			request.getFiles(),
-			"menu-images",
-			url -> MenuImage.builder()
-				.imgUrl(url)
-				.menu(menu)
-				.build()
-		);
-
-		if (menuImages.isEmpty()) {
-			throw new MenuException(MenuExceptionCode.MENU_IMAGE_UPLOAD_FAILED);
+		List<MenuImage> menuImages = null;
+		if (request.getFiles() != null && !request.getFiles().isEmpty()) {
+			try {
+				menuImageRepository.deleteByMenu(menu);
+				menuImages = fileService.uploadAndCreateEntities(
+					request.getFiles(),
+					"menu-images",
+					url -> MenuImage.builder()
+						.imgUrl(url)
+						.menu(menu)
+						.build()
+				);
+			} catch (Exception e) {
+				throw new MenuException(MenuExceptionCode.MENU_IMAGE_UPLOAD_FAILED);
+			}
 		}
 
 		menu.updateMenu(request);
+
+		if (menuImages != null && !menuImages.isEmpty()) {
+			menuImageRepository.saveAll(menuImages);
+		}
+
 		MenuResponse response = MenuResponse.builder()
 			.menuId(menu.getId())
 			.description(menu.getDescription())
