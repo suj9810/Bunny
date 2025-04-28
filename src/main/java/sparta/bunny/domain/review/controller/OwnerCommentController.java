@@ -48,11 +48,11 @@ public class OwnerCommentController {
 	 * @return 삭제 성공 여부
 	 */
 	@DeleteMapping
-	public ResponseEntity<String> deleteOwnerComment(
+	public ResponseEntity<CommonResponse<String>> deleteOwnerComment(
 		@Valid @RequestBody OwnerCommentDeleteRequestDto dto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		ownerReviewService.deleteOwnerComment(dto, userDetails);
-		return ResponseEntity.status(HttpStatus.OK).body("삭제 되었습니다");
+		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.of("DELETE_SUCCESFUL", "삭제에 성공하였습니다."));
 	}
 }
