@@ -9,7 +9,7 @@ public class SearchHistoriesDto {
 
     private final String keyword;
 
-    public SearchHistoriesDto(final String keyword) {
+    public SearchHistoriesDto(String keyword) {
         this.keyword = keyword;
     }
 
