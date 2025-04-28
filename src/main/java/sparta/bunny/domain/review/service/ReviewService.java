@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -46,6 +47,7 @@ public class ReviewService {
 	private final FileService fileService;
 
 	@Transactional
+	@PreAuthorize("hasRole('USER')")
 	public CommonResponse<ReviewCreateResponse> saveReview(
 		ReviewCreateRequest request, UserDetailsImpl userDetails
 	) throws IOException {
@@ -108,6 +110,7 @@ public class ReviewService {
 		return CommonResponses.of(ReviewSuccessCode.REVIEW_FOUND_SUCCESS, responsePage);
 	}
 
+	@PreAuthorize("hasRole('USER')")
 	public void deleteReviewsById(ReviewDeleteRequestDto dto, UserDetailsImpl userDetails) {
 
 		Review review = reviewRepository.findByIdWithReviewImages(dto.getReviewId())
