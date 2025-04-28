@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import sparta.bunny.common.response.ResponseCode;
 
+/**
+ * Menu Exception Code
+ */
 @Getter
 @RequiredArgsConstructor
 public enum MenuExceptionCode implements ResponseCode {
@@ -21,7 +24,7 @@ public enum MenuExceptionCode implements ResponseCode {
 	// 404 NOT_FOUND
 	NOT_FOUND_STORE(false, HttpStatus.NOT_FOUND, "스토어가 없습니다.", "NOT_FOUND_STORE"),
 	NOT_FOUND_MENU(false, HttpStatus.NOT_FOUND, "메뉴가 없습니다.", "NOT_FOUND_MENU"),
-	;
+	MENU_IMAGE_UPLOAD_FAILED(false, HttpStatus.BAD_REQUEST, "메뉴 이미지 업로드 실패", "MENU_IMAGE_UPLOAD_FAILED");
 
 	private final boolean success;
 	private final HttpStatus httpStatus;

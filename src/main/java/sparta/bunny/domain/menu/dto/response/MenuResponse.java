@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * 메뉴 응답
+ */
 @Getter
 @Builder
 @AllArgsConstructor

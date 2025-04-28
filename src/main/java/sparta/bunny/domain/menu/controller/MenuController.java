@@ -23,6 +23,9 @@ import sparta.bunny.domain.menu.dto.request.MenuUpdateRequest;
 import sparta.bunny.domain.menu.dto.response.MenuResponse;
 import sparta.bunny.domain.menu.service.MenuService;
 
+/**
+ * Menu Controller
+ */
 @RestController
 @RequestMapping("/menus")
 @RequiredArgsConstructor
@@ -31,6 +34,14 @@ public class MenuController {
 
 	private final MenuService menuService;
 
+	/**
+	 * 메뉴 생성
+	 *
+	 * @param request
+	 * @param userDetails the user details
+	 * @return the response entity
+	 * @throws IOException the io exception
+	 */
 	@PostMapping
 	public ResponseEntity<CommonResponse<MenuResponse>> createMenuWithImg(
 		@ModelAttribute @Valid MenuCreateRequest request,
@@ -39,6 +50,15 @@ public class MenuController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
+	/**
+	 * 메뉴 수정
+	 *
+	 * @param menuId the menu id
+	 * @param request the request
+	 * @param userDetails the user details
+	 * @return the response entity
+	 * @throws IOException the io exception
+	 */
 	@PutMapping("/{menuId}")
 	public ResponseEntity<CommonResponse<MenuResponse>> updateMenu(
 		@PathVariable Long menuId,
@@ -48,6 +68,13 @@ public class MenuController {
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
+	/**
+	 * 메뉴 삭제 (softDelete)
+	 *
+	 * @param menuId the menu id
+	 * @param userDetails the user details
+	 * @return the response entity
+	 */
 	@DeleteMapping("/{menuId}")
 	public ResponseEntity<CommonResponse<MenuResponse>> deleteMenu(
 		@PathVariable Long menuId,

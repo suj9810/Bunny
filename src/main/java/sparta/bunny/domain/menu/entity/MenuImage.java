@@ -15,6 +15,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Menu Image Entity
+ */
 @Entity
 @Getter
 @Table(name = "menu_images")
