@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
+import sparta.bunny.domain.order.code.OrderSuccessCode;
 import sparta.bunny.domain.order.dto.ChangeOrderStatusRequestDto;
 import sparta.bunny.domain.order.dto.OrderResponseDto;
 import sparta.bunny.domain.order.service.OrderService;
@@ -34,10 +36,13 @@ public class OrderController {
 	 */
 	@PreAuthorize("hasRole('USER')")
 	@PostMapping
-	public ResponseEntity<OrderResponseDto> createOrder(
+	public ResponseEntity<CommonResponse<OrderResponseDto>> createOrder(
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
-		return ResponseEntity.ok(orderService.createOrder(userDetails.getUser().getId()));
+		OrderResponseDto orderResponseDto = orderService.createOrder(userDetails.getUser().getId());
+		return ResponseEntity.ok(
+			CommonResponse.of(OrderSuccessCode.ORDER_CREATE_SUCCESS, orderResponseDto)
+		);
 	}
 
 	/**
@@ -47,8 +52,12 @@ public class OrderController {
 	 */
 	@PreAuthorize("hasRole('USER')")
 	@GetMapping
-	public ResponseEntity<List<OrderResponseDto>> getOrderList(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-		return ResponseEntity.ok(orderService.getOrderList(userDetails.getUser().getId()));
+	public ResponseEntity<CommonResponse<List<OrderResponseDto>>> getOrderList(
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		List<OrderResponseDto> orderList = orderService.getOrderList(userDetails.getUser().getId());
+		return ResponseEntity.ok(
+			CommonResponse.of(OrderSuccessCode.ORDER_LIST_GET_SUCCESS, orderList)
+		);
 	}
 
 	/**
@@ -58,21 +67,32 @@ public class OrderController {
 	 */
 	@PreAuthorize("hasRole('USER')")
 	@GetMapping("/{orderId}")
-	public ResponseEntity<OrderResponseDto> getOrder(
+	public ResponseEntity<CommonResponse<OrderResponseDto>> getOrder(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long orderId
 	) {
-		return ResponseEntity.ok(orderService.getOrder(userDetails.getUser().getId(), orderId));
+		OrderResponseDto orderResponseDto = orderService.getOrder(userDetails.getUser().getId(), orderId);
+		return ResponseEntity.ok(
+			CommonResponse.of(OrderSuccessCode.ORDER_GET_SUCCESS, orderResponseDto)
+		);
 	}
 
+	/**
+	 * 주문 취소
+	 * @param userDetails
+	 * @param orderId
+	 * @return
+	 */
 	@PreAuthorize("hasRole('USER')")
 	@DeleteMapping("/{orderId}")
-	public ResponseEntity<Void> deleteOrder(
+	public ResponseEntity<CommonResponse<Void>> deleteOrder(
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
 		@PathVariable Long orderId
 	) {
 		orderService.deleteOrder(userDetails.getUser().getId(), orderId);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(
+			CommonResponse.of(OrderSuccessCode.ORDER_CANCEL_SUCCESS, null)
+		);
 	}
 
 	/**
@@ -80,10 +100,13 @@ public class OrderController {
 	 */
 	@PreAuthorize("hasRole('OWNER')")
 	@PatchMapping("/{orderId}")
-	public ResponseEntity<OrderResponseDto> changeOrderStatus(
+	public ResponseEntity<CommonResponse<OrderResponseDto>> changeOrderStatus(
 		@PathVariable Long orderId,
 		@RequestBody ChangeOrderStatusRequestDto requestDto
 	) {
-		return ResponseEntity.ok(orderService.changeOrderStatus(orderId, requestDto));
+		OrderResponseDto orderResponseDto = orderService.changeOrderStatus(orderId, requestDto);
+		return ResponseEntity.ok(
+			CommonResponse.of(OrderSuccessCode.ORDER_STATUS_UPDATE_SUCCESS, orderResponseDto)
+		);
 	}
 }

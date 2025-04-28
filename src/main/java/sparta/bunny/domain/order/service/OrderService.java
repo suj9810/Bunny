@@ -4,27 +4,35 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import lombok.RequiredArgsConstructor;
+import sparta.bunny.domain.cart.code.CartExceptionCode;
 import sparta.bunny.domain.cart.dto.CartMenuResponseDto;
 import sparta.bunny.domain.cart.entity.CartMenu;
+import sparta.bunny.domain.cart.exception.CartException;
 import sparta.bunny.domain.cart.service.CartService;
+import sparta.bunny.domain.menu.code.MenuExceptionCode;
 import sparta.bunny.domain.menu.entity.Menu;
+import sparta.bunny.domain.menu.exception.MenuException;
 import sparta.bunny.domain.menu.repository.MenuRepository;
+import sparta.bunny.domain.order.code.OrderExceptionCode;
 import sparta.bunny.domain.order.dto.ChangeOrderStatusRequestDto;
 import sparta.bunny.domain.order.dto.OrderMenuDto;
 import sparta.bunny.domain.order.dto.OrderResponseDto;
 import sparta.bunny.domain.order.entity.Order;
 import sparta.bunny.domain.order.entity.OrderMenu;
 import sparta.bunny.domain.order.enums.OrderStatus;
+import sparta.bunny.domain.order.exception.OrderException;
 import sparta.bunny.domain.order.repository.OrderRepository;
+import sparta.bunny.domain.stores.code.StoreExceptionCode;
 import sparta.bunny.domain.stores.entity.Store;
+import sparta.bunny.domain.stores.exception.StoreException;
 import sparta.bunny.domain.stores.repository.StoreRepository;
+import sparta.bunny.domain.user.code.UserErrorCode;
 import sparta.bunny.domain.user.entity.User;
+import sparta.bunny.domain.user.exception.UserException;
 import sparta.bunny.domain.user.repository.UserRepository;
 
 @Service
@@ -45,21 +53,21 @@ public class OrderService {
 		CartMenuResponseDto cart = cartService.getCart(userId);
 
 		if (cart.getMenus() == null || cart.getMenus().isEmpty()) {
-			throw new IllegalArgumentException("장바구니가 비어 있습니다.");
+			throw new CartException(CartExceptionCode.CART_EMPTY);
 		}
 
 		//User 정보 가져오기
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		//가게 정보 가져오기
 		Store store = storeRepository.findById(cart.getStoreId())
-			.orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다."));
+			.orElseThrow(() -> new StoreException(StoreExceptionCode.STORE_NOT_FOUND));
 
 		LocalTime now = LocalTime.now();
 
 		//가게 오픈시간 전이거나 마감시간 지났을때
 		if (now.isBefore(store.getOpenTime()) || now.isAfter(store.getCloseTime())) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "주문 가능 시간이 아닙니다.");
+			throw new OrderException(OrderExceptionCode.ORDER_NOT_AVAILABLE_TIME);
 		}
 
 		//유저와 가게 정보로 주문 객체 만들기
@@ -70,7 +78,7 @@ public class OrderService {
 
 		for (CartMenu cartItem : cart.getMenus()) {
 			Menu menu = menuRepository.findById(cartItem.getMenuId())
-				.orElseThrow(() -> new IllegalArgumentException("메뉴를 찾을 수 없습니다."));
+				.orElseThrow(() -> new MenuException(MenuExceptionCode.NOT_FOUND_MENU));
 
 			totalPrice += menu.getPrice() * cartItem.getQuantity();
 
@@ -88,7 +96,7 @@ public class OrderService {
 
 		// 최소 주문금액 미달일때
 		if (totalPrice < store.getMinOrderPrice()) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "최소 주문금액을 충족하지 못했습니다.");
+			throw new OrderException(OrderExceptionCode.ORDER_MIN_PRICE_NOT_MET);
 		}
 
 		orderRepository.save(order);
@@ -102,7 +110,7 @@ public class OrderService {
 	public List<OrderResponseDto> getOrderList(Long userId) {
 
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 유저 아이디 입니다."));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		return user.getOrderList().stream()
 			.map(OrderResponseDto::fromOrder)
@@ -113,10 +121,10 @@ public class OrderService {
 	public OrderResponseDto getOrder(Long userId, Long orderId) {
 
 		Order order = orderRepository.findByIdWithOrderMenus(orderId)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
+			.orElseThrow(() -> new OrderException(OrderExceptionCode.ORDER_NOT_FOUND));
 
 		if (!userId.equals(order.getUser().getId())) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "잘못된 접근입니다.");
+			throw new OrderException(OrderExceptionCode.UNAUTHORIZED_ACCESS);
 		}
 
 		return OrderResponseDto.fromOrder(order);
@@ -125,14 +133,14 @@ public class OrderService {
 	public void deleteOrder(Long userId, Long orderId) {
 
 		Order order = orderRepository.findByIdWithOrderMenus(orderId)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
+			.orElseThrow(() -> new OrderException(OrderExceptionCode.ORDER_NOT_FOUND));
 
 		if (!userId.equals(order.getUser().getId())) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "잘못된 접근입니다.");
+			throw new OrderException(OrderExceptionCode.UNAUTHORIZED_ACCESS);
 		}
 
 		if (!order.getOrderStatus().equals(OrderStatus.PENDING)) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "주문이 확정 되어 주문을 취소할 수 없습니다.");
+			throw new OrderException(OrderExceptionCode.ORDER_CANNOT_CANCEL_CONFIRMED);
 		}
 
 		orderRepository.delete(order);
@@ -142,7 +150,7 @@ public class OrderService {
 	public OrderResponseDto changeOrderStatus(Long orderId, ChangeOrderStatusRequestDto requestDto) {
 
 		Order order = orderRepository.findById(orderId)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
+			.orElseThrow(() -> new OrderException(OrderExceptionCode.ORDER_NOT_FOUND));
 		order.updateOrderStatus(OrderStatus.of(requestDto.getOrderStatus()));
 
 		return OrderResponseDto.fromOrder(order);
