@@ -13,11 +13,11 @@ import static org.mockito.Mockito.anyString;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -36,13 +36,15 @@ import sparta.bunny.domain.menu.entity.MenuImage;
 import sparta.bunny.domain.menu.exception.MenuException;
 import sparta.bunny.domain.menu.repository.MenuImageRepository;
 import sparta.bunny.domain.menu.repository.MenuRepository;
+import sparta.bunny.domain.stores.entity.Category;
 import sparta.bunny.domain.stores.entity.Store;
 import sparta.bunny.domain.stores.repository.StoreRepository;
 import sparta.bunny.domain.user.entity.User;
 
 /**
- * The type Menu service test.
+ * 메뉴 서비스 단위 테스트
  */
+@DisplayName("MenuService 단위 테스트")
 class MenuServiceTest {
 
 	@InjectMocks
@@ -68,12 +70,8 @@ class MenuServiceTest {
 		MockitoAnnotations.openMocks(this);
 	}
 
-	/**
-	 * 메뉴 생성 성공
-	 *
-	 * @throws Exception the exception
-	 */
 	@Test
+	@DisplayName("메뉴 생성 성공 - 이미지 포함")
 	void saveMenu_success() throws Exception {
 		//given
 		Long loginUserId = 1L;
@@ -87,9 +85,16 @@ class MenuServiceTest {
 			.closeTime("22:00")
 			.minOrderPrice(10000)
 			.isClosed(false)
-			.categoryName("치킨")
+			.categoryName(Category.패스트푸드)
 			.build();
 		ReflectionTestUtils.setField(store, "id", storeId);
+
+		MockMultipartFile mockFile = new MockMultipartFile(
+			"files", // name
+			"image.jpg", // originalFilename
+			"image/jpeg", // contentType
+			"test image content".getBytes() // content
+		);
 
 		MenuCreateRequest request = MenuCreateRequest.builder()
 			.storeId(storeId)
@@ -100,7 +105,7 @@ class MenuServiceTest {
 				.name("파 추가")
 				.price(1000)
 				.build()))
-			.files(Collections.emptyList()) // 빈 리스트로 삽입
+			.files(List.of(mockFile)) // 빈 리스트로 삽입
 			.build();
 
 		given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
@@ -121,9 +126,7 @@ class MenuServiceTest {
 		verify(fileService, times(1)).uploadAndCreateEntities(anyList(), eq("menu-images"), any());
 	}
 
-	/**
-	 * 테스트: 존재하지 않는 Store ID를 저장 시 NOT_FOUND_STORE 예외 발생 검증
-	 */
+	@DisplayName("메뉴 생성 실패 - 존재하지 않는 Store ID")
 	@Test
 	void saveMenu_storeNotFound_throwsMenuException() {
 		//given
@@ -144,9 +147,7 @@ class MenuServiceTest {
 		assertEquals(MenuExceptionCode.NOT_FOUND_STORE, thrown.getResponseCode());
 	}
 
-	/**
-	 * Save menu user not store owner throws not owner of store exception.
-	 */
+	@DisplayName("메뉴 생성 실패 - 유저가 매장 주인이 아님")
 	@Test
 	void saveMenu_userNotStoreOwner_throwsNotOwnerOfStoreException() {
 		// given
@@ -161,7 +162,7 @@ class MenuServiceTest {
 			.closeTime("22:00")
 			.minOrderPrice(10000)
 			.isClosed(false)
-			.categoryName("치킨")
+			.categoryName(Category.패스트푸드)
 			.build();
 		ReflectionTestUtils.setField(store, "id", storeId);
 
@@ -183,11 +184,7 @@ class MenuServiceTest {
 		assertEquals(MenuExceptionCode.NOT_OWNER_OF_STORE, thrown.getResponseCode());
 	}
 
-	/**
-	 * Test image upload and linking success.
-	 *
-	 * @throws IOException the io exception
-	 */
+	@DisplayName("이미지 업로드 및 링크 성공")
 	@Test
 	void testImageUploadAndLinkingSuccess() throws IOException {
 		// given
@@ -202,7 +199,7 @@ class MenuServiceTest {
 			.closeTime("22:00")
 			.minOrderPrice(10000)
 			.isClosed(false)
-			.categoryName("치킨")
+			.categoryName(Category.패스트푸드)
 			.build();
 		ReflectionTestUtils.setField(store, "id", storeId);
 
