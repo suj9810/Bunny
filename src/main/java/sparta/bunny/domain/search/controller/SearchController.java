@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import sparta.bunny.common.response.CommonResponse;
+import sparta.bunny.common.response.CommonResponses;
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
 import sparta.bunny.domain.search.code.SearchSuccessCode;
 import sparta.bunny.domain.search.dto.request.SearchRequestDto;
@@ -32,23 +34,12 @@ public class SearchController {
      * @param dto
      * @return 키워드가 포함된 가게 정보 및 해당 가게의 메뉴 이름들 리스트로 반환
      */
-    @PostMapping("/user")
-    public ResponseEntity<CommonResponse<List<SearchResponseDto>>> searchForUsers(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                                 @RequestBody @Valid SearchRequestDto dto) {
-        List<SearchResponseDto> result = searchService.getAndSaveSearchLog(userDetails.getUser().getId(), dto.getKeyword());
 
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.of(SearchSuccessCode.SEARCH_AND_HISTORY_SAVE_SUCCESS, result));
-    }
-
-    /**
-     * 가게 검색 및 검색 내영 저장 (비회원)
-     * @param dto
-     * @return
-     */
     @PostMapping
-    public ResponseEntity<CommonResponse<List<SearchResponseDto>>> search(@RequestBody @Valid SearchRequestDto dto) {
-
-        List<SearchResponseDto> result = searchService.getAndSaveSearchLog(null, dto.getKeyword());
+    public ResponseEntity<CommonResponse<List<SearchResponseDto>>> searchForUsers(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                                   @RequestBody @Valid SearchRequestDto dto) {
+        List<SearchResponseDto> result = searchService.getAndSaveSearchLog(
+                userDetails == null ? null : userDetails.getUser().getId(), dto.getKeyword());
 
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.of(SearchSuccessCode.SEARCH_AND_HISTORY_SAVE_SUCCESS, result));
     }
@@ -62,7 +53,7 @@ public class SearchController {
     public ResponseEntity<CommonResponse<List<PopularKeywordDto>>> getPopularKeywords() {
 
         List<PopularKeywordDto> result = searchService.getPopularKeywords();
-
+      
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.of(SearchSuccessCode.POPULAR_KEYWORDS_FETCH_SUCCESS, result));
     }
 
@@ -73,6 +64,7 @@ public class SearchController {
      * @return
      */
     @GetMapping("/histories")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommonResponse<List<SearchHistoriesDto>>> getMySearchHistories(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         List<SearchHistoriesDto> result = searchService.getHistories(userDetails.getUser().getId());
@@ -86,6 +78,7 @@ public class SearchController {
      * @return
      */
     @DeleteMapping("/user")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CommonResponse> deleteSearchLogs(@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         searchService.deleteHistories(userDetails.getUser());

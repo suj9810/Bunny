@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sparta.bunny.domain.search.dto.response.MenuSummaryResponseDto;
 import sparta.bunny.domain.search.dto.response.PopularKeywordDto;
 import sparta.bunny.domain.search.dto.response.SearchHistoriesDto;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class SearchService {
 
     private final SearchLogRepository searchLogRepository;
@@ -28,35 +30,27 @@ public class SearchService {
     private final UserRepository userRepository;
 
     // 검색 결과 조회 및 기록 저장
+
     public List<SearchResponseDto> getAndSaveSearchLog(Long userId, String keyword) {
 
         // 회원
         if (userId != null) {
             User currentUser = userRepository.findById(userId).orElse(null);
             SearchLog searchLog = searchLogRepository.save(new SearchLog(currentUser, keyword));
+        } else {
+            // 비회원
+            SearchLog searchLog = searchLogRepository.save(new SearchLog(null, keyword));
         }
-        // 비회원
-        SearchLog searchLog = searchLogRepository.save(new SearchLog(null, keyword));
-
 
         // 가게 정보 및 해당 가게의 메뉴 이름 간단 표시
         return storeRepository.findByStoreNameContaining(keyword).stream()
-                .map(store -> new SearchResponseDto(
-                        store.getId(),
-                        store.getStoreName(),
-                        store.getMinOrderPrice(),
-                        store.getOpenTime(),
-                        store.getCloseTime(),
-                        store.getIsClosed(),
-                        store.getMenus().stream().map(menu -> new MenuSummaryResponseDto(
-                                menu.getId(),
-                                menu.getName()
-                        )).toList()
-                )).toList();
+                .map(SearchResponseDto::new).toList();
+
 
     }
 
     // 유저 최근 검색어 리스트로 반환
+    @Transactional(readOnly = true)
     public List<SearchHistoriesDto> getHistories(Long userId) {
 
         // 이메일로 로그인한 유저 바인딩
@@ -69,6 +63,7 @@ public class SearchService {
     }
 
     // 인기 검색어 리스트로 반환
+    @Transactional(readOnly = true)
     public List<PopularKeywordDto> getPopularKeywords() {
 
         Pageable top10 = PageRequest.of(0, 10); // 10개만 볼 수 있게 페이징
@@ -85,7 +80,7 @@ public class SearchService {
         return list;
     }
 
-    // 내 검색 기록 삭제
+    // 내 검색 기록 전체 삭제
     public void deleteHistories(User user) {
 
         if(user == null) {

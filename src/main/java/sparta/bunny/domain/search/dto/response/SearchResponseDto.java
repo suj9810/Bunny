@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import sparta.bunny.domain.menu.entity.Menu;
 import sparta.bunny.domain.stores.entity.Store;
 
 @Getter
@@ -24,14 +25,17 @@ public class SearchResponseDto {
 	// 가게의 메뉴 정보
 	private final List<MenuSummaryResponseDto> menus;
 
-	public SearchResponseDto(Store store, List<MenuSummaryResponseDto> menus) {
+	public SearchResponseDto(Store store) {
 		this.storeId = store.getId();
 		this.storeName = store.getStoreName();
 		this.minOrderPrice = store.getMinOrderPrice();
 		this.openTime = store.getOpenTime();
 		this.closeTime = store.getCloseTime();
 		this.isClosed = store.getIsClosed();
-		this.menus = menus;
+		this.menus = store.getMenus().stream()
+				.map(menu -> new MenuSummaryResponseDto(
+						menu.getId(),
+						menu.getName())).toList();
 	}
 
 }
