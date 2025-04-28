@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
 import sparta.bunny.domain.cart.dto.CartMenuRequestDto;
@@ -31,6 +32,9 @@ class CartServiceTest {
 
 	@Mock
 	private RedisTemplate<String, Cart> redisTemplate;
+
+	@Mock
+	private ValueOperations<String, Cart> valueOperations;
 
 	@Mock
 	private MenuRepository menuRepository;
@@ -57,15 +61,17 @@ class CartServiceTest {
 			.userRole(UserRole.USER)
 			.build();
 		UserDetailsImpl userDetails = new UserDetailsImpl(user);
-		
+
 		given(menuRepository.findById(menuId)).willReturn(Optional.of(menu));
-		given(redisTemplate.opsForValue().get("cart:" + userId)).willReturn(null);
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+		given(valueOperations.get("cart:" + userId)).willReturn(null);
 
 		// when
 		cartService.addToCart(userDetails, storeId, requestDto);
 
 		// then
-		verify(redisTemplate, times(1)).opsForValue().set(eq("cart:" + userId), any(Cart.class));
+		verify(valueOperations, times(1)).get("cart:" + userId);
+		verify(valueOperations, times(1)).set(eq("cart:" + userId), any(Cart.class));
 	}
 
 	@Test
@@ -75,7 +81,8 @@ class CartServiceTest {
 		Long userId = 1L;
 		Cart cart = new Cart(1L);
 		cart.getMenus().add(new CartMenu(100L, "치킨", 15000, 2));
-		given(redisTemplate.opsForValue().get("cart:" + userId)).willReturn(cart);
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+		given(valueOperations.get("cart:" + userId)).willReturn(cart);
 
 		// when
 		CartMenuResponseDto response = cartService.getCart(userId);
@@ -95,13 +102,15 @@ class CartServiceTest {
 
 		Cart cart = new Cart(1L);
 		cart.getMenus().add(new CartMenu(menuId, "치킨", 15000, 2));
-		given(redisTemplate.opsForValue().get("cart:" + userId)).willReturn(cart);
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+		given(valueOperations.get("cart:" + userId)).willReturn(cart);
 
 		// when
 		cartService.removeMenu(userId, menuId);
 
 		// then
-		verify(redisTemplate, times(1)).opsForValue().set(eq("cart:" + userId), any(Cart.class));
+		verify(valueOperations, times(1)).get("cart:" + userId);
+		verify(valueOperations, times(1)).set(eq("cart:" + userId), any(Cart.class));
 	}
 
 	@Test
