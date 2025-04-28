@@ -15,6 +15,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sparta.bunny.common.audit.BaseEntity;
 
+/**
+ * Menu option Entity
+ */
 @Entity
 @Table(name = "menu_option")
 @Getter
@@ -34,6 +37,7 @@ public class MenuOption extends BaseEntity {
 	private String name;
 
 	@Column(nullable = false)
+	@Builder.Default
 	private Integer price = 0;
 
 }
