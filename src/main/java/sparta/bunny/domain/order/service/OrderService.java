@@ -122,6 +122,22 @@ public class OrderService {
 		return OrderResponseDto.fromOrder(order);
 	}
 
+	public void deleteOrder(Long userId, Long orderId) {
+
+		Order order = orderRepository.findByIdWithOrderMenus(orderId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 주문 입니다."));
+
+		if (!userId.equals(order.getUser().getId())) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "잘못된 접근입니다.");
+		}
+
+		if (!order.getOrderStatus().equals(OrderStatus.PENDING)) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "주문이 확정 되어 주문을 취소할 수 없습니다.");
+		}
+
+		orderRepository.delete(order);
+	}
+
 	@Transactional
 	public OrderResponseDto changeOrderStatus(Long orderId, ChangeOrderStatusRequestDto requestDto) {
 
@@ -131,5 +147,4 @@ public class OrderService {
 
 		return OrderResponseDto.fromOrder(order);
 	}
-
 }
