@@ -2,7 +2,7 @@ package sparta.bunny.domain.user.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 import java.util.Optional;
 
@@ -53,7 +53,7 @@ class UserServiceTest {
 		Long userId = 1L;
 		User user = createUser(userId);
 
-		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
 		// when
 		UserResponseDto response = userService.getUserById(userId);
@@ -71,7 +71,7 @@ class UserServiceTest {
 		// given
 		Long userId = 1L;
 
-		when(userRepository.findById(userId)).thenReturn(Optional.empty()); // 유저 없음 설정
+		given(userRepository.findById(userId)).willReturn(Optional.empty()); // 유저 없음 설정
 
 		// when
 		UserException exception = assertThrows(UserException.class, () -> userService.getUserById(userId));
@@ -116,11 +116,11 @@ class UserServiceTest {
 		UserPasswordUpdateRequestDto requestDto = new UserPasswordUpdateRequestDto(currentRawPassword, newRawPassword);
 
 		// 입력한 비밀번호 == 현재 암호화된 비밀번호(강제)
-		when(passwordEncoder.matches(currentRawPassword, currentEncodedPassword)).thenReturn(true);
+		given(passwordEncoder.matches(currentRawPassword, currentEncodedPassword)).willReturn(true);
 		// 현재 암호화된 비밀번호 != 새 비밀번호(강제)
-		when(passwordEncoder.matches(newRawPassword, currentEncodedPassword)).thenReturn(false);
+		given(passwordEncoder.matches(newRawPassword, currentEncodedPassword)).willReturn(false);
 		// 새 비밀번호 -> 새로 암호화된 비밀번호
-		when(passwordEncoder.encode(newRawPassword)).thenReturn(newEncodedPassword);
+		given(passwordEncoder.encode(newRawPassword)).willReturn(newEncodedPassword);
 
 		// when
 		userService.updatePassword(user, requestDto);
@@ -146,7 +146,7 @@ class UserServiceTest {
 		UserPasswordUpdateRequestDto requestDto = new UserPasswordUpdateRequestDto(wrongCurrentPassword, newPassword);
 
 		// 저장된 비밀번호 != 현재 비밀번호(강제)
-		when(passwordEncoder.matches(wrongCurrentPassword, storedPassword)).thenReturn(false);
+		given(passwordEncoder.matches(wrongCurrentPassword, storedPassword)).willReturn(false);
 
 		// when
 		UserException exception = assertThrows(UserException.class, () -> userService.updatePassword(user, requestDto));
@@ -171,8 +171,8 @@ class UserServiceTest {
 			= new UserPasswordUpdateRequestDto(currentRawPassword, currentRawPassword); // 새 비번 = 현재 비번
 
 		// 입력한 비밀번호 == 저장된 비밀번호
-		when(passwordEncoder.matches(currentRawPassword, currentEncodedPassword)).thenReturn(true); // 현재 비번 일치
-		when(passwordEncoder.matches(currentRawPassword, currentEncodedPassword)).thenReturn(true); // 새 비번도 일치하게
+		given(passwordEncoder.matches(currentRawPassword, currentEncodedPassword)).willReturn(true); // 현재 비번 일치
+		given(passwordEncoder.matches(currentRawPassword, currentEncodedPassword)).willReturn(true); // 새 비번도 일치하게
 
 		// when
 		UserException exception = assertThrows(UserException.class, () -> userService.updatePassword(user, requestDto));
