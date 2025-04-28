@@ -2,7 +2,7 @@ package sparta.bunny.domain.auth.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 import java.util.Optional;
 
@@ -45,6 +45,18 @@ class AuthServiceTest {
 	@Mock
 	private RedisTemplate<String, String> redisTemplate;
 
+	private User createUser(Long id, String email, String encodedPassword, boolean isDeleted) {
+		return User.builder()
+			.id(id)
+			.email(email)
+			.password(encodedPassword)
+			.nickname("테스트유저")
+			.userRole(UserRole.USER)
+			.userNumber("010-1234-5678")
+			.isDeleted(isDeleted)
+			.build();
+	}
+
 	@Test
 	@DisplayName("로그인 성공 테스트")
 	void loginSuccess() {
@@ -55,24 +67,13 @@ class AuthServiceTest {
 		String accessToken = "mockAccessToken";
 		String refreshToken = "mockRefreshToken";
 
-		// 로그인 요청 Dto
 		LoginRequestDto requestDto = new LoginRequestDto(email, password);
+		User user = createUser(1L, email, encodedPassword, false);
 
-		// User 객체
-		User user = User.builder()
-			.id(1L)
-			.email(email)
-			.password(encodedPassword)
-			.nickname("테스트유저")
-			.userRole(UserRole.USER)
-			.userNumber("010-1234-5678")
-			.isDeleted(false)
-			.build();
-
-		when(userRepository.findByEmail(email)).thenReturn(Optional.of(user)); // 이메일로 유저 찾기
-		when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true); // 비밀번호 일치
-		when(tokenProvider.createAccessToken(user)).thenReturn(accessToken); // 액세스 토큰 발급
-		when(tokenProvider.createRefreshToken(user)).thenReturn(refreshToken); // 리프레시 토큰 발급
+		given(userRepository.findByEmail(email)).willReturn(Optional.of(user)); // 이메일로 유저 찾기
+		given(passwordEncoder.matches(password, encodedPassword)).willReturn(true); // 비밀번호 일치
+		given(tokenProvider.createAccessToken(user)).willReturn(accessToken); // 액세스 토큰 발급
+		given(tokenProvider.createRefreshToken(user)).willReturn(refreshToken); // 리프레시 토큰 발급
 
 		// when
 		LoginResponseDto response = authService.login(requestDto);
@@ -97,7 +98,7 @@ class AuthServiceTest {
 		LoginRequestDto request = new LoginRequestDto(email, password);
 
 		// 이메일로 조회했을 때 빈값 반환
-		when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+		given(userRepository.findByEmail(email)).willReturn(Optional.empty());
 
 		// when
 		UserException exception = assertThrows(UserException.class, () -> authService.login(request));
@@ -116,18 +117,10 @@ class AuthServiceTest {
 
 		LoginRequestDto requestDto = new LoginRequestDto(email, wrongPassword);
 
-		User user = User.builder()
-			.id(1L)
-			.email(email)
-			.password("encodedPassword")
-			.nickname("테스트유저")
-			.userRole(UserRole.USER)
-			.userNumber("010-1234-5678")
-			.isDeleted(false)
-			.build();
+		User user = createUser(1L, email, "encodedPassword", false);
 
-		when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-		when(passwordEncoder.matches(wrongPassword, user.getPassword())).thenReturn(false);
+		given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+		given(passwordEncoder.matches(wrongPassword, user.getPassword())).willReturn(false);
 
 		// when
 		UserException exception = assertThrows(UserException.class, () -> authService.login(requestDto));
@@ -143,7 +136,7 @@ class AuthServiceTest {
 		Long userId = 1L;
 		String refreshToken = "mockRefreshToken";
 
-		when(refreshTokenRepository.findByUserId(userId)).thenReturn(refreshToken);
+		given(refreshTokenRepository.findByUserId(userId)).willReturn(refreshToken);
 
 		// when
 		authService.logout(userId);
@@ -159,7 +152,7 @@ class AuthServiceTest {
 		Long userId = 1L;
 
 		// refreshToken 조회했는데 null 반환
-		when(refreshTokenRepository.findByUserId(userId)).thenReturn(null);
+		given(refreshTokenRepository.findByUserId(userId)).willReturn(null);
 
 		// when
 		UserException exception = assertThrows(UserException.class, () -> authService.logout(userId));
@@ -175,20 +168,12 @@ class AuthServiceTest {
 		Long userId = 1L;
 		String rawPassword = "CorrectPassword123!";
 
-		User user = User.builder()
-			.id(userId)
-			.email("test@example.com")
-			.password("encodedPassword")
-			.nickname("테스트유저")
-			.userRole(UserRole.USER)
-			.userNumber("010-1234-5678")
-			.isDeleted(false)
-			.build();
+		User user = createUser(userId, "test@example.com", "encodedPassword", false);
 
 		UserDeleteRequestDto requestDto = new UserDeleteRequestDto(rawPassword);
 
-		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(passwordEncoder.matches(rawPassword, user.getPassword())).thenReturn(true);
+		given(userRepository.findById(userId)).willReturn(Optional.of(user));
+		given(passwordEncoder.matches(rawPassword, user.getPassword())).willReturn(true);
 
 		// when
 		authService.deleteUser(user, requestDto);
@@ -205,16 +190,7 @@ class AuthServiceTest {
 		Long userId = 1L;
 		String wrongPassword = "WrongPassword123!";
 
-		User user = User.builder()
-			.id(userId)
-			.email("test@example.com")
-			.password("encodedPassword")
-			.nickname("테스트유저")
-			.userRole(UserRole.USER)
-			.userNumber("010-1234-5678")
-			.isDeleted(false)
-			.build();
-
+		User user = createUser(userId, "test@example.com", "encodedPassword", false);
 		UserDeleteRequestDto requestDto = new UserDeleteRequestDto(wrongPassword);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -232,18 +208,9 @@ class AuthServiceTest {
 	void hardDeleteUser() {
 		// given
 		Long userId = 1L;
+		User user = createUser(userId, "test@example.com", "encodedPassword", true);
 
-		User user = User.builder()
-			.id(userId)
-			.email("test@example.com")
-			.password("encodedPassword")
-			.nickname("테스트유저")
-			.userRole(UserRole.USER)
-			.userNumber("010-1234-5678")
-			.isDeleted(true) // 이미 소프트 삭제된 상태
-			.build();
-
-		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
 		// when
 		authService.hardDeleteUser(userId);
