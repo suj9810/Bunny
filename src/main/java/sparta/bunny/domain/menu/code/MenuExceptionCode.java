@@ -15,6 +15,7 @@ public enum MenuExceptionCode implements ResponseCode {
 	// ❌ 400 BAD REQUEST
 	CATEGORY_INVALID(false, HttpStatus.BAD_REQUEST, "잘못된 카테고리 ID입니다.", "CATEGORY_INVALID"),
 	FIELD_MISSING(false, HttpStatus.BAD_REQUEST, "필수 입력값이 누락되었습니다.", "FIELD_MISSING"),
+	MENU_IMAGE_UPLOAD_FAILED(false, HttpStatus.BAD_REQUEST, "메뉴 이미지 업로드 실패", "MENU_IMAGE_UPLOAD_FAILED"),
 	// 🔒 401 UNAUTHORIZED
 	UNAUTHORIZED(false, HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다.", "UNAUTHORIZED"),
 	// 🚫 403 FORBIDDEN
@@ -24,7 +25,7 @@ public enum MenuExceptionCode implements ResponseCode {
 	// 404 NOT_FOUND
 	NOT_FOUND_STORE(false, HttpStatus.NOT_FOUND, "스토어가 없습니다.", "NOT_FOUND_STORE"),
 	NOT_FOUND_MENU(false, HttpStatus.NOT_FOUND, "메뉴가 없습니다.", "NOT_FOUND_MENU"),
-	MENU_IMAGE_UPLOAD_FAILED(false, HttpStatus.BAD_REQUEST, "메뉴 이미지 업로드 실패", "MENU_IMAGE_UPLOAD_FAILED");
+	;
 
 	private final boolean success;
 	private final HttpStatus httpStatus;
