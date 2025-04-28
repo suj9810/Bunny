@@ -3,6 +3,9 @@ package sparta.bunny.domain.menu.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
@@ -100,9 +103,9 @@ class MenuServiceTest {
 			.files(Collections.emptyList()) // 빈 리스트로 삽입
 			.build();
 
-		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(menuRepository.save(any(Menu.class))).thenAnswer(invocation -> invocation.getArgument(0));
-		when(fileService.uploadAndCreateEntities(anyList(), anyString(), any())).thenReturn(List.of(
+		given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
+		given(menuRepository.save(any(Menu.class))).willAnswer(invocation -> invocation.getArgument(0));
+		given(fileService.uploadAndCreateEntities(anyList(), anyString(), any())).willReturn(List.of(
 			MenuImage.builder().imgUrl("http://example.com/image1.jpg").build()));
 		//when
 		var response = menuService.saveMenu(request, loginUserId);
@@ -132,7 +135,7 @@ class MenuServiceTest {
 			.price(30000)
 			.build();
 
-		when(storeRepository.findById(nonExistStoreId)).thenReturn(Optional.empty());
+		given(storeRepository.findById(nonExistStoreId)).willReturn(Optional.empty());
 		//when
 		MenuException thrown = assertThrows(MenuException.class, () -> {
 			menuService.saveMenu(request, 1L);
@@ -169,7 +172,7 @@ class MenuServiceTest {
 			.price(30000)
 			.build();
 
-		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
 
 		// when
 		MenuException thrown = assertThrows(MenuException.class, () -> {
@@ -221,8 +224,8 @@ class MenuServiceTest {
 			.imgUrl("http://example.com/image1.jpg")
 			.build();
 
-		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(fileService.uploadAndCreateEntities(anyList(), anyString(), any())).thenReturn(List.of(menuImage));
+		given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
+		given(fileService.uploadAndCreateEntities(anyList(), anyString(), any())).willReturn(List.of(menuImage));
 		// when
 		CommonResponse<MenuResponse> response = menuService.saveMenu(request, loginUserId);
 		// then
