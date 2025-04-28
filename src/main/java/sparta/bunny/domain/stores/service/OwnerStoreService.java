@@ -17,6 +17,7 @@ import sparta.bunny.domain.stores.code.StoreExceptionCode;
 import sparta.bunny.domain.stores.dto.request.StoreRequestDto;
 import sparta.bunny.domain.stores.dto.response.StoreResponseDto;
 import sparta.bunny.domain.stores.dto.response.StoreWithMenuResponseDto;
+import sparta.bunny.domain.stores.entity.Category;
 import sparta.bunny.domain.stores.entity.Store;
 import sparta.bunny.domain.stores.exception.StoreException;
 import sparta.bunny.domain.stores.repository.StoreRepository;
@@ -47,6 +48,7 @@ public class OwnerStoreService {
 			.openTime(requestDto.getOpenTime())
 			.closeTime(requestDto.getCloseTime())
 			.minOrderPrice(requestDto.getMinOrderPrice())
+			.notice(requestDto.getNotice())
 			.isClosed(false) // 처음 등록할땐 폐업 아니라고 체크
 			.categoryName(requestDto.getCategoryName())
 			.build();
@@ -95,9 +97,9 @@ public class OwnerStoreService {
 
 	// 전체 가게 조회 (카테고리가 있으면 카테고리별로 전체 조회 없으면 가게 전체 조회)
 	@Transactional(readOnly = true)
-	public Page<StoreResponseDto> getStoresByCategory(User user, String categoryName, Pageable pageable) {
+	public Page<StoreResponseDto> getStoresByCategory(User user, Category categoryName, Pageable pageable) {
 		Page<Store> stores;
-		if (categoryName != null && !categoryName.isBlank()) { // 카테고리가 있을 때 카테고리별로 조회
+		if (categoryName != null) { // 카테고리가 있을 때 카테고리별로 조회
 			stores = storeRepository.findAllByUserAndCategoryName(user, categoryName, pageable);
 		} else { // 카테고리가 없을 때 전체 조회
 			stores = storeRepository.findAllByUser(user, pageable);
