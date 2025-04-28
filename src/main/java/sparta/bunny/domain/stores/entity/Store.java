@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,22 +29,29 @@ public class Store {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
+	@Column(nullable = false)
 	private String storeName; // 가게 이름
 
+	@Column(nullable = false)
 	private LocalTime openTime; // 오픈 시간
 
+	@Column(nullable = false)
 	private LocalTime closeTime; // 닫는 시간
 
+	@Column(nullable = false)
 	private Integer minOrderPrice; // 최소 금액
 
+	@Column(nullable = false)
 	private String notice; // 가게 공지
 
+	@Column(nullable = false)
 	private Boolean isClosed; // 폐업 여부
 
 	@Enumerated(EnumType.STRING)

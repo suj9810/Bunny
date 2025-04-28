@@ -16,6 +16,7 @@ import sparta.bunny.domain.menu.repository.MenuRepository;
 import sparta.bunny.domain.stores.code.StoreExceptionCode;
 import sparta.bunny.domain.stores.dto.response.StoreResponseDto;
 import sparta.bunny.domain.stores.dto.response.StoreWithMenuResponseDto;
+import sparta.bunny.domain.stores.entity.Category;
 import sparta.bunny.domain.stores.entity.Store;
 import sparta.bunny.domain.stores.exception.StoreException;
 import sparta.bunny.domain.stores.repository.StoreRepository;
@@ -29,11 +30,12 @@ public class UserStoreService {
 
 	// 전체 가게 조회(사용자 계정이므로 폐업된 가게는 조회하지 않음)
 	@Transactional(readOnly = true)
-	public Page<StoreResponseDto> getStores(String categoryName, Pageable pageable) {
+	public Page<StoreResponseDto> getStores(Category categoryName, Pageable pageable) {
+
 		Page<Store> stores;
-		if (categoryName != null && !categoryName.isEmpty()) { // 카테고리가 있으면 카테고리별로 전체 가게가 조회
+		if (categoryName != null) { // 카테고리가 있으면 카테고리별로 전체 가게 조회
 			stores = storeRepository.findAllByCategoryNameAndIsClosedFalse(categoryName, pageable);
-		} else { // 카테고리가 없으면 모든 가게가 조회
+		} else { // 카테고리가 없으면 모든 가게 조회
 			stores = storeRepository.findAllByIsClosedFalse(pageable);
 		}
 

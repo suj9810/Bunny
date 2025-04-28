@@ -85,7 +85,7 @@ class MenuServiceTest {
 			.closeTime("22:00")
 			.minOrderPrice(10000)
 			.isClosed(false)
-			.categoryName(Category.패스트푸드)
+			.categoryName(Category.FAST_FOOD)
 			.build();
 		ReflectionTestUtils.setField(store, "id", storeId);
 
@@ -162,7 +162,7 @@ class MenuServiceTest {
 			.closeTime("22:00")
 			.minOrderPrice(10000)
 			.isClosed(false)
-			.categoryName(Category.패스트푸드)
+			.categoryName(Category.FAST_FOOD)
 			.build();
 		ReflectionTestUtils.setField(store, "id", storeId);
 
@@ -199,7 +199,7 @@ class MenuServiceTest {
 			.closeTime("22:00")
 			.minOrderPrice(10000)
 			.isClosed(false)
-			.categoryName(Category.패스트푸드)
+			.categoryName(Category.FAST_FOOD)
 			.build();
 		ReflectionTestUtils.setField(store, "id", storeId);
 

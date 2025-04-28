@@ -27,6 +27,7 @@ import sparta.bunny.domain.stores.dto.request.StoreRequestDto;
 import sparta.bunny.domain.stores.dto.request.StoreStatusDto;
 import sparta.bunny.domain.stores.dto.response.StoreResponseDto;
 import sparta.bunny.domain.stores.dto.response.StoreWithMenuResponseDto;
+import sparta.bunny.domain.stores.entity.Category;
 import sparta.bunny.domain.stores.service.OwnerStoreService;
 
 @RestController
@@ -67,7 +68,7 @@ public class OwnerStoreController {
 
 	/**
 	 * 전체 가게 조회
-	 * @param categories 카테고리별로 구분
+	 * @param categoryName 카테고리별로 구분
 	 * @param page 페이지 번호
 	 * @param size 한 페이지당 몇개의 가게 보여줄지
 	 * @param userDetails 인증된 사용자 정보
@@ -75,13 +76,13 @@ public class OwnerStoreController {
 	 */
 	@GetMapping
 	public ResponseEntity<CommonResponses<StoreResponseDto>> getAllStores(
-		@RequestParam(required = false) String categories,
-		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(required = false) Category categoryName,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "5") int size,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-		Pageable pageable = PageRequest.of(page, size);
-		Page<StoreResponseDto> storeList = ownerStoreService.getStoresByCategory(userDetails.getUser(), categories,
+		Pageable pageable = PageRequest.of(page - 1, size);
+		Page<StoreResponseDto> storeList = ownerStoreService.getStoresByCategory(userDetails.getUser(), categoryName,
 			pageable);
 
 		return ResponseEntity.ok(CommonResponses.of(StoreSuccessCode.STORE_FETCH_ALL_SUCCESS, storeList));
@@ -119,5 +120,3 @@ public class OwnerStoreController {
 	}
 
 }
-
-

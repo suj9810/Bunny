@@ -77,7 +77,7 @@ class OwnerReviewServiceTest {
 			.minOrderPrice(1)
 			.notice("공지")
 			.isClosed(false)
-			.categoryName(Category.분식)
+			.categoryName(Category.SNACK)
 			.build();
 		ReflectionTestUtils.setField(store, "id", 1L);
 
