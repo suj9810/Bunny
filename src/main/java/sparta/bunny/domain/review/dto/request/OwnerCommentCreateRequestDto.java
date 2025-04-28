@@ -1,6 +1,7 @@
 package sparta.bunny.domain.review.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OwnerCommentCreateRequestDto {
 
-	@NotBlank
+	@NotNull
 	private Long reviewId;
 	@NotBlank
 	private String content;
