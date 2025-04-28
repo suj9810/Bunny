@@ -10,5 +10,4 @@ public class OrderMenuDto {
 	private String menuName;
 	private int quantity;
 	private int price;
-
 }
