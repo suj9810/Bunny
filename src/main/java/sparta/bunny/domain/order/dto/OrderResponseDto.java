@@ -32,7 +32,17 @@ public class OrderResponseDto {
 	}
 
 	public static OrderResponseDto fromOrder(Order order) {
+		List<OrderMenuDto> items = order.getOrderMenus().stream()
+			.map(menu -> new OrderMenuDto(
+				menu.getMenu().getId(),
+				menu.getMenu().getName(),
+				menu.getOrderCnt(),
+				menu.getMenu().getPrice()
+			))
+			.toList();
+
 		return new OrderResponseDto(order.getId(), order.getUser().getId(), order.getStore().getId(),
-			order.getOrderedAt(), order.getOrderStatus().name(), null);
+			order.getOrderedAt(), order.getOrderStatus().name(), items);
 	}
+
 }
