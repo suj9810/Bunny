@@ -1,4 +1,4 @@
-package sparta.bunny.domain.search;
+package sparta.bunny.domain.search.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,6 @@ import sparta.bunny.domain.search.dto.response.PopularKeywordDto;
 import sparta.bunny.domain.search.dto.response.SearchHistoriesDto;
 import sparta.bunny.domain.search.entity.SearchLog;
 import sparta.bunny.domain.search.repository.SearchLogRepository;
-import sparta.bunny.domain.search.service.SearchService;
 
 import sparta.bunny.domain.stores.repository.StoreRepository;
 import sparta.bunny.domain.user.entity.User;
