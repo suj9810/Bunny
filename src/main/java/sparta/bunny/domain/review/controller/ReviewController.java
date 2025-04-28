@@ -84,12 +84,12 @@ public class ReviewController {
 	 * @return 삭제 성공 여부
 	 */
 	@DeleteMapping
-	public ResponseEntity<String> deleteReview(
+	public ResponseEntity<CommonResponse<String>> deleteReview(
 		@Valid @RequestBody ReviewDeleteRequestDto dto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 
 	) {
 		reviewService.deleteReviewsById(dto, userDetails);
-		return ResponseEntity.status(HttpStatus.OK).body("리뷰 삭제에 성공하였습니다.");
+		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.of("DELETE_SUCCESFUL", "삭제에 성공하였습니다."));
 	}
 }
