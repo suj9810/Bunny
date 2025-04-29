@@ -19,7 +19,10 @@ import sparta.bunny.common.response.CommonResponse;
 import sparta.bunny.common.response.CommonResponses;
 import sparta.bunny.common.service.FileService;
 import sparta.bunny.domain.auth.jwt.UserDetailsImpl;
+import sparta.bunny.domain.order.code.OrderExceptionCode;
 import sparta.bunny.domain.order.entity.Order;
+import sparta.bunny.domain.order.enums.OrderStatus;
+import sparta.bunny.domain.order.exception.OrderException;
 import sparta.bunny.domain.order.repository.OrderRepository;
 import sparta.bunny.domain.review.code.ReviewExceptionCode;
 import sparta.bunny.domain.review.code.ReviewSuccessCode;
@@ -55,7 +58,11 @@ public class ReviewService {
 	) throws IOException {
 
 		Order order = orderRepository.findById(request.getOrderId())
-			.orElseThrow(() -> new RuntimeException("주문 정보가 일치하지 않습니다.")); // Todo - Order Exception 사용하기
+			.orElseThrow(() -> new OrderException(OrderExceptionCode.ORDER_NOT_FOUND));
+
+		if (!OrderStatus.DELIVERED.equals(order.getOrderStatus())) {
+			throw new OrderException(ReviewExceptionCode.DELIVERY_NOT_COMPLETE);
+		}
 
 		if (!userDetails.getUser().getId().equals(order.getUser().getId())) {
 			throw new ReviewException(ReviewExceptionCode.NOT_OWNER_OF_ORDER);
