@@ -83,7 +83,7 @@ class OrderServiceTest {
 			.minOrderPrice(5000)
 			.notice("Notice")
 			.isClosed(false)
-			.categoryName(Category.한식)
+			.categoryName(Category.KOREAN)
 			.build();
 		ReflectionTestUtils.setField(store, "id", storeId);
 
@@ -140,7 +140,7 @@ class OrderServiceTest {
 			.minOrderPrice(5000)
 			.notice("Notice 2")
 			.isClosed(false)
-			.categoryName(Category.양식)
+			.categoryName(Category.WESTERN)
 			.build();
 
 		Order order = new Order(user, store);
@@ -179,7 +179,7 @@ class OrderServiceTest {
 			.minOrderPrice(4000)
 			.notice("Third notice")
 			.isClosed(false)
-			.categoryName(Category.일식)
+			.categoryName(Category.JAPANESE)
 			.build();
 
 		Order order = new Order(user, store);
